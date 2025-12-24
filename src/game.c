@@ -4,8 +4,9 @@
 #include "game.h"
 #include "util.h"
 #include "assets.h"
+#include "colors.h"
 
-struct game {
+struct {
     struct {
         texture_index_t sprite_state;
         int pos_x, pos_y;
@@ -38,22 +39,23 @@ static bool timer_triggered(timer_slot_t slot, double interval) {
 void game_setup(void) {
     init_timer_slot(2);
     load_map(&game.map, &game.map_height, &game.map_width, &game.pacman.pos_x, &game.pacman.pos_y);
+
 }
 
 void game_tick(void) {
-    if (timer_triggered(SLOT_PACMAN_SPRITE_STATE, 1)) {
+    if (timer_triggered(SLOT_PACMAN_SPRITE_STATE, 0.2)) {
         if (game.pacman.sprite_state == TEXTURE_PACOPEN)
             game.pacman.sprite_state = TEXTURE_PACCLOSED;
         else game.pacman.sprite_state = TEXTURE_PACOPEN;
     }    
-    if (timer_triggered(SLOT_PACMAN_MOVE,0.5)) {
-        if (game.pacman.move_up)
-            game.pacman.pos_y++;
-        if (game.pacman.move_left)
-            game.pacman.pos_x--;
-        if (game.pacman.move_down)
+    if (timer_triggered(SLOT_PACMAN_MOVE,0.3)) {
+        if (game.pacman.move_up && game.map[game.pacman.pos_y - 1][game.pacman.pos_x] != CELL_WALL)
             game.pacman.pos_y--;
-        if (game.pacman.move_right)
+        if (game.pacman.move_left && game.map[game.pacman.pos_y][game.pacman.pos_x - 1] != CELL_WALL)
+            game.pacman.pos_x--;
+        if (game.pacman.move_down && game.map[game.pacman.pos_y + 1][game.pacman.pos_x] != CELL_WALL)
+            game.pacman.pos_y++;
+        if (game.pacman.move_right && game.map[game.pacman.pos_y][game.pacman.pos_x + 1] != CELL_WALL)
             game.pacman.pos_x++;        
     }
     if (IsKeyDown(KEY_W)) {
@@ -88,11 +90,12 @@ static void draw_map(void) {
             switch (game.map[i][j]) {
                 case CELL_PACMAN_SPAWN:
                 case CELL_GHOST_SPAWNER:
-                case CELL_BACKGROUND: DrawRectangle( i * TEXTURE_SCALE, j * TEXTURE_SCALE, TEXTURE_SCALE, TEXTURE_SCALE, BLACK); break;
-                case CELL_WALL: DrawRectangle( i * TEXTURE_SCALE, j * TEXTURE_SCALE, TEXTURE_SCALE, TEXTURE_SCALE, BLUE); break;
+                case CELL_BACKGROUND: DrawRectangle( j * TEXTURE_SCALE, i * TEXTURE_SCALE, TEXTURE_SCALE, TEXTURE_SCALE, BLACK); break;
+                case CELL_WALL: DrawRectangle( j * TEXTURE_SCALE, i * TEXTURE_SCALE, TEXTURE_SCALE, TEXTURE_SCALE, WALL_COLOR); break;
+                default: DrawTexture(resources.textures[TEXTURE_ERROR], j * TEXTURE_SCALE, i * TEXTURE_SCALE, WHITE);
             }
             if (i == game.pacman.pos_y && j == game.pacman.pos_x)
-                DrawTexture(resources.textures[game.pacman.sprite_state], i * TEXTURE_SCALE, j * TEXTURE_SCALE, WHITE);
+                DrawTexture(resources.textures[game.pacman.sprite_state], j * TEXTURE_SCALE, i * TEXTURE_SCALE, WHITE);
         }
     }
 }
@@ -102,6 +105,7 @@ void game_draw(void) {
     ClearBackground(BLACK);
 
     draw_map();
+    DrawFPS(0, game.map_height * TEXTURE_SCALE);
 
     EndDrawing();
 }

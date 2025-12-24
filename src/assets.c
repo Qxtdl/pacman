@@ -25,8 +25,8 @@ void load_assets(void) {
     load_texture("assets/textures/pacman/pacOpen.png", TEXTURE_SCALE, TEXTURE_SCALE);
     load_texture("assets/textures/pacman/pacClosed.png", TEXTURE_SCALE, TEXTURE_SCALE);
 
-    // map
-    load_texture("assets/textures/map/map3-12.png", 0, 0);
+    // error
+    load_texture("assets/textures/error.png", TEXTURE_SCALE, TEXTURE_SCALE);
 }
 
 void load_map(
@@ -57,9 +57,9 @@ void load_map(
             goto do_strtok;
         }
         unsigned long cell_value = strtoul(cell, NULL, 10);
-        (*map)[i][j++] = cell_value;
-        if  (cell_value == CELL_PACMAN_SPAWN)
+        if (cell_value == CELL_PACMAN_SPAWN)
             *pacman_pos_y = i, *pacman_pos_x = j;
+        (*map)[i][j++] = cell_value;
     
     do_strtok:
         if (!(cell = strtok(NULL, ",")))

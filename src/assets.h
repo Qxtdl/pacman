@@ -8,7 +8,7 @@ typedef enum {
     TEXTURE_PACOPEN,
     TEXTURE_PACCLOSED,
 
-    TEXTURE_MAP
+    TEXTURE_ERROR
 } texture_index_t;
 
 extern struct {
