@@ -1,22 +1,26 @@
-#include <stdlib.h>
 #include <raylib.h>
+#include <stdio.h>
 
-#include "util.h"
 #include "game.h"
 #include "assets.h"
 #include "timer.h"
 #include "colors.h"
 #include "game/pacman.h"
+#include "game/ghost.h"
 
 struct game game = {0};
 
 void game_setup(void) {
-    init_timer_slot(2);
+    init_timer_slot(3);
     load_map(&game.map, &game.map_height, &game.map_width, &game.pacman.pos_x, &game.pacman.pos_y, &game.max_points);
+    ghosts_setup();
 }
 
 void game_tick(void) {
+    if (game.game_over) return;
+
     pacman_tick();
+    ghost_tick();
 }
 
 static void draw_map(void) {
@@ -32,10 +36,12 @@ static void draw_map(void) {
             }
             if (i == game.pacman.pos_y && j == game.pacman.pos_x)
                 DrawTexture(resources.textures[game.pacman.sprite_state], j * TEXTURE_SCALE, i * TEXTURE_SCALE, WHITE);
+            
+            for (int k = 0; k < game.ghosts_amount; k++)
+                if (game.ghosts[k].pos_x == j && game.ghosts[k].pos_y == i)
+                    DrawTexture(resources.textures[game.ghosts[k].sprite_state], j * TEXTURE_SCALE, i * TEXTURE_SCALE, WHITE);
         }
     }
-
-    DrawTexture(resources.textures[TEXTURE_GHOST], 18 * TEXTURE_SCALE, 18 * TEXTURE_SCALE, WHITE); // little temporary test
 }
 
 void game_draw(void) {
@@ -44,6 +50,7 @@ void game_draw(void) {
 
     draw_map();
     DrawText(TextFormat("Points: %d\nMax Points: %d", game.pacman.points, game.max_points), 0, game.map_height * TEXTURE_SCALE, TEXTURE_SCALE, WHITE);
+    if (game.game_over) DrawText("GAME OVER", 0, 0, TEXTURE_SCALE * 2, RED);
 
     EndDrawing();
 }

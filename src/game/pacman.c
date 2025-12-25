@@ -2,16 +2,17 @@
 
 #include "../game.h"
 #include "../timer.h"
+#include "ghost.h"
 
 extern struct game game;
 
 void pacman_tick(void) {
-    if (timer_triggered(SLOT_PACMAN_SPRITE_STATE, 0.2)) {
+    if (timer_triggered(SLOT_PACMAN_SPRITE_STATE, SLOT_PACMAN_SPRITE_STATE_VALUE)) {
         if (game.pacman.sprite_state == TEXTURE_PACOPEN)
             game.pacman.sprite_state = TEXTURE_PACCLOSED;
         else game.pacman.sprite_state = TEXTURE_PACOPEN;
     }    
-    if (timer_triggered(SLOT_PACMAN_MOVE, 0.3)) {
+    if (timer_triggered(SLOT_PACMAN_MOVE, SLOT_PACMAN_MOVE_VALUE)) {
         if (game.pacman.move_up && game.map[game.pacman.pos_y - 1][game.pacman.pos_x] != CELL_WALL)
             game.pacman.pos_y--;
         if (game.pacman.move_left && game.map[game.pacman.pos_y][game.pacman.pos_x - 1] != CELL_WALL)
@@ -50,4 +51,7 @@ void pacman_tick(void) {
         game.map[game.pacman.pos_y][game.pacman.pos_x] = CELL_BACKGROUND;
         game.pacman.points++;
     }
+    for (int i = 0; i < game.ghosts_amount; i++)
+        if (game.ghosts[i].pos_x == game.pacman.pos_x && game.ghosts[i].pos_y == game.pacman.pos_y)
+            game.game_over = true;
 }

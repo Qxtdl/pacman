@@ -12,7 +12,7 @@ int main() {
     game_setup();
 
     while (!WindowShouldClose()) {
-        game_tick();
         game_draw();
+        game_tick();
     }
 }

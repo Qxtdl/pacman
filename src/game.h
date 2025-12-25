@@ -1,6 +1,9 @@
 #pragma once
 
+#include <stdbool.h>
+
 #include "texture_index.h"
+#include "game/ghost.h"
 
 #define TEXTURE_SCALE 30
 
@@ -14,9 +17,15 @@ struct game {
         bool move_up, move_left, move_down, move_right;
         int points;
     } pacman;
+
+    ghost_t *ghosts;
+    int ghosts_amount;
+
     int max_points;
     char map[MAX_MAP_HEIGHT][MAX_MAP_WIDTH];
     int map_height, map_width;
+
+    bool game_over;
 };
 
 enum {
