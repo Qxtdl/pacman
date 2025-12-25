@@ -4,13 +4,6 @@
 
 #include "game.h"
 
-typedef enum {
-    TEXTURE_PACOPEN,
-    TEXTURE_PACCLOSED,
-
-    TEXTURE_ERROR
-} texture_index_t;
-
 extern struct {
     Texture2D *textures;
 } resources;
@@ -22,5 +15,6 @@ void load_map(
     int *map_height,
     int *map_width,
     int *pacman_pos_x,
-    int *pacman_pos_y
+    int *pacman_pos_y,
+    int *game_max_points
 );

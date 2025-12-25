@@ -25,6 +25,9 @@ void load_assets(void) {
     load_texture("assets/textures/pacman/pacOpen.png", TEXTURE_SCALE, TEXTURE_SCALE);
     load_texture("assets/textures/pacman/pacClosed.png", TEXTURE_SCALE, TEXTURE_SCALE);
 
+    // ghost
+    load_texture("assets/textures/ghosts/ghost.png", TEXTURE_SCALE, TEXTURE_SCALE);
+
     // error
     load_texture("assets/textures/error.png", TEXTURE_SCALE, TEXTURE_SCALE);
 }
@@ -34,7 +37,8 @@ void load_map(
     int *map_height,
     int *map_width,
     int *pacman_pos_x,
-    int *pacman_pos_y
+    int *pacman_pos_y,
+    int *game_max_points
 ) {
     FILE *file = fopen("assets/map.txt", "r");
     fseek(file, 0, SEEK_END);
@@ -59,6 +63,8 @@ void load_map(
         unsigned long cell_value = strtoul(cell, NULL, 10);
         if (cell_value == CELL_PACMAN_SPAWN)
             *pacman_pos_y = i, *pacman_pos_x = j;
+        if (cell_value == CELL_POINT)
+            (*game_max_points)++;
         (*map)[i][j++] = cell_value;
     
     do_strtok:
