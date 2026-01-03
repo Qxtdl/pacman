@@ -26,5 +26,6 @@ void *scalloc(size_t nmemb, size_t size) {
 }
 
 int random_int(int min, int max) {
+    srand(time(NULL));
     return min + rand() % (max + 1  - min);
 }
