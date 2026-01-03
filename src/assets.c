@@ -49,6 +49,7 @@ void load_map(
     if ((long)read_size != file_size)
         app_abort("load_map()", "Error reading map.txt")
     map_txt[file_size] = '\0';
+    fclose(file);
 
     int i = 0, j = 0;
     char *cell = strtok(map_txt, ",");

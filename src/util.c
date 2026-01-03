@@ -18,8 +18,13 @@ void *srealloc(void *ptr, size_t size) {
     return alloc;    
 }
 
-int random_int(int min, int max)
-{
-    srand(time(NULL));
-    return min + rand() % (max+1 - min);
+void *scalloc(size_t nmemb, size_t size) {
+    void *alloc = calloc(nmemb, size);
+    if (!alloc)
+        app_abort("scalloc()", "Failed to allocate memory")
+    return alloc;
+}
+
+int random_int(int min, int max) {
+    return min + rand() % (max + 1  - min);
 }
