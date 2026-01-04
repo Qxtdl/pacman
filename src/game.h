@@ -8,8 +8,8 @@
 
 #define TEXTURE_SCALE 30
 
-#define MAX_MAP_HEIGHT 32
-#define MAX_MAP_WIDTH 32
+#define MAX_MAP_HEIGHT 40
+#define MAX_MAP_WIDTH 40
 
 struct game {
     struct pacman pacman;
@@ -17,11 +17,12 @@ struct game {
 
     int ghosts_amount;
 
+    int current_level;
     char map[MAX_MAP_HEIGHT][MAX_MAP_WIDTH];
     int map_height, map_width;
     int max_points;
 
-    bool game_over;
+    bool won, game_over;
 
     bool debugging;
 };

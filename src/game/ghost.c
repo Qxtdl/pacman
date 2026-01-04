@@ -62,33 +62,36 @@ static void ghost_moveto(ghost_t *ghost, int pos_y, int pos_x) {
     int pos_y_diff = (ghost->new_state ? lookup_ghost_target(ghost, ghost->state, 0) : pos_y) - ghost->pos_y,
         pos_x_diff = (ghost->new_state ? lookup_ghost_target(ghost, ghost->state, 1) : pos_x) - ghost->pos_x;
 
-    if (pos_x_diff > 0 && !is_wall_or_ghost(ghost->pos_y, ghost->pos_x + 1))
+    if (pos_x_diff > 0 && (!is_wall_or_ghost(ghost->pos_y, ghost->pos_x + 1) || ghost->is_eaten))
         ghost->pos_x++;
-    else if (pos_x_diff < 0 && !is_wall_or_ghost(ghost->pos_y, ghost->pos_x -    1))
+    else if (pos_x_diff < 0 && (!is_wall_or_ghost(ghost->pos_y, ghost->pos_x -1) || ghost->is_eaten))
         ghost->pos_x--;
-    else if (pos_y_diff > 0 && !is_wall_or_ghost(ghost->pos_y + 1, ghost->pos_x))
+    else if (pos_y_diff > 0 && (!is_wall_or_ghost(ghost->pos_y + 1, ghost->pos_x) || ghost->is_eaten))
         ghost->pos_y++;
-    else if (pos_y_diff < 0 && !is_wall_or_ghost(ghost->pos_y  -  1, ghost->pos_x))
+    else if (pos_y_diff < 0 && (!is_wall_or_ghost(ghost->pos_y  -  1, ghost->pos_x) || ghost->is_eaten))
         ghost->pos_y--;
-    else if (!ghost->is_eaten) {
-        if (ghost->state != STATE_SCATTER && ghost->state != STATE_FRIGHTENED)
+    else {
+        if (ghost->state != STATE_SCATTER)
             set_ghost_state(ghost, STATE_SCATTER);
         else if (ghost->state == STATE_SCATTER)
             set_ghost_state(ghost, ghost->old_state);
     }
 
-    if (ghost->pos_y == lookup_ghost_target(ghost, ghost->state, 0) && ghost->pos_x == lookup_ghost_target(ghost, ghost->state, 1))
-        set_ghost_state(ghost, ghost->old_state);
+    if (ghost->pos_y == lookup_ghost_target(ghost, ghost->state, 0) && ghost->pos_x == lookup_ghost_target(ghost, ghost->state, 1)) {
+        if (!ghost->is_eaten)
+            set_ghost_state(ghost, ghost->old_state);
+        else if (ghost->is_eaten) {
+            ghost->is_eaten = false;
+            set_ghost_state(ghost, STATE_CHASE);
+        }
+    }
 }
 
 void ghost_tick(void) {
     if (timer_triggered(SLOT_GHOST_MOVE, game.pacman.power_mode ? SLOT_GHOST_MOVE_VALUE_FRIGHTENED : SLOT_GHOST_MOVE_VALUE))
         for (int i = 0; i < game.ghosts_amount; i++) {
-            if (game.ghosts[i].is_eaten) {
-                ghost_moveto(&game.ghosts[i], game.ghosts[i].spawn_pos_y, game.ghosts[i].spawn_pos_x);
-                continue;
-            }
             switch (game.ghosts[i].state) {
+                case STATE_NULL: break;
                 case STATE_CHASE: ghost_moveto(&game.ghosts[i], game.pacman.pos_y, game.pacman.pos_x); break;
                 case STATE_FRIGHTENED:
                     if (game.pacman.pos_y == game.ghosts[i].pos_y && game.pacman.pos_x == game.ghosts[i].pos_x + 1)
@@ -102,6 +105,7 @@ void ghost_tick(void) {
                     else ghost_moveto(&game.ghosts[i], random_int(0, game.map_height), random_int(0, game.map_width));
                     break;
                 case STATE_SCATTER: ghost_moveto(&game.ghosts[i], random_int(0, game.map_height), random_int(0, game.map_width)); break;
+                case STATE_EATEN: ghost_moveto(&game.ghosts[i], game.ghosts[i].spawn_pos_y, game.ghosts[i].spawn_pos_x); break;
                 default: app_abort("ghost_tick()", "Unknown ghost state") break;
             }
             if (game.ghosts[i].new_state)
@@ -109,6 +113,8 @@ void ghost_tick(void) {
         }
 
     for (int i = 0; game.pacman.power_mode && i < game.ghosts_amount; i++)
-        if (game.ghosts[i].pos_y == game.pacman.pos_y && game.ghosts[i].pos_x == game.pacman.pos_x)
+        if (game.ghosts[i].pos_y == game.pacman.pos_y && game.ghosts[i].pos_x == game.pacman.pos_x) {
             game.ghosts[i].is_eaten = true;
+            set_ghost_state(&game.ghosts[i], STATE_EATEN);
+        }
 }

@@ -9,7 +9,8 @@ enum state {
     STATE_CHASE,
     STATE_SCATTER,
     STATE_FRIGHTENED,
-
+    STATE_EATEN,
+    
     STATE_AMOUNT
 };
 

@@ -11,6 +11,7 @@ extern struct {
 void load_texture(const char *filename);
 void load_assets(void);
 void load_map(
+    const char *filename,
     char (*map)[MAX_MAP_HEIGHT][MAX_MAP_WIDTH], 
     int *map_height,
     int *map_width,

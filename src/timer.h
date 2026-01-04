@@ -9,7 +9,7 @@ typedef enum {
     SLOT_PACMAN_SPRITE_STATE,
     SLOT_PACMAN_POWER_DURATION,
 
-    SLOT_GAME_OVER_DURATION,
+    SLOT_ROUND_END_DURATION,
 
     TIMER_SLOT_AMOUNT
 } timer_slot_t;
@@ -22,7 +22,7 @@ typedef enum {
 #define SLOT_PACMAN_SPRITE_STATE_VALUE 0.2
 #define SLOT_PACMAN_POWER_DURATION_VALUE 15
 
-#define SLOT_GAME_OVER_DURATION_VALUE 4
+#define SLOT_ROUND_END_DURATION_VALUE 4
 
 void init_timer_slot(size_t size);
 bool timer_triggered(timer_slot_t slot, double interval);

@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "game.h"
@@ -9,17 +10,25 @@
 #include "game/pacman.h"
 #include "game/ghost.h"
 
+#define MAX_LEVEL_FILENAME_LENGTH 32
+
 struct game game = {0};
 
 void game_setup(void) {
+    char buf[MAX_LEVEL_FILENAME_LENGTH] = {0};
+    strcpy(buf, "assets/");
+    strcat(buf, "level");
+    sprintf(buf + strlen(buf), "%d", game.current_level);
+    strcat(buf, ".txt");
+
     init_timer_slot(TIMER_SLOT_AMOUNT);
-    load_map(&game.map, &game.map_height, &game.map_width, &game.pacman.pos_x, &game.pacman.pos_y, &game.max_points);
+    load_map(buf, &game.map, &game.map_height, &game.map_width, &game.pacman.pos_x, &game.pacman.pos_y, &game.max_points);
     ghosts_setup();
 }
 
 void game_tick(void) {
     if (game.game_over) {
-        if (timer_triggered(SLOT_GAME_OVER_DURATION, SLOT_GAME_OVER_DURATION_VALUE) || IsKeyPressed(KEY_SPACE)) {
+        if (timer_triggered(SLOT_ROUND_END_DURATION, SLOT_ROUND_END_DURATION_VALUE) || IsKeyPressed(KEY_SPACE)) {
             memset(&game, 0, sizeof(game));
             game.game_over = false;
             reset_ghosts();
@@ -27,6 +36,22 @@ void game_tick(void) {
         }
         return;
     }
+
+    if (game.won) {
+        if (timer_triggered(SLOT_ROUND_END_DURATION, SLOT_ROUND_END_DURATION_VALUE) || IsKeyPressed(KEY_SPACE)) {
+            int current_level = game.current_level;
+            memset(&game, 0, sizeof(game));
+            game.current_level = current_level + 1;
+            reset_ghosts();
+            game_setup();
+        }
+        return;    
+    }
+    if (game.pacman.points == game.max_points || game.debugging && IsKeyPressed(KEY_K)) {
+        set_timer_slot(SLOT_ROUND_END_DURATION, GetTime());
+        game.won = true;
+    }
+
     if (IsKeyPressed(KEY_G))
         game.debugging = !game.debugging;
     static bool do_ghost_tick = true;
@@ -77,6 +102,8 @@ void game_draw(void) {
     DrawText(TextFormat("Points: %d\nMax Points: %d", game.pacman.points, game.max_points), 0, game.map_height * TEXTURE_SCALE, TEXTURE_SCALE, WHITE);
     if (game.pacman.power_mode) DrawText(TextFormat("ATE A POWER PELLET\nTIME REMAINING: %f\n", (float)get_delta_time(SLOT_PACMAN_POWER_DURATION)), (game.pacman.pos_x - 2) * TEXTURE_SCALE, (game.pacman.pos_y - 1) * TEXTURE_SCALE, TEXTURE_SCALE / 1.5, RED);
     if (game.game_over) DrawText("GAME OVER\nPress space", 0, (game.map_height + 2) * TEXTURE_SCALE, TEXTURE_SCALE, RED);
+    else if (game.won) DrawText("GAME WON!\nPress space -> next level", 0, (game.map_height + 2) * TEXTURE_SCALE, TEXTURE_SCALE, GREEN);
+    if (game.debugging) DrawText("Debugging\nG to exit", 0, (game.map_height + 4) * TEXTURE_SCALE, TEXTURE_SCALE, ORANGE);
 
     EndDrawing();
 }

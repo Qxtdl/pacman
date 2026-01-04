@@ -79,6 +79,6 @@ void pacman_tick(void) {
     for (int i = 0; !game.pacman.power_mode && i < game.ghosts_amount; i++)
         if (!game.ghosts[i].is_eaten && game.ghosts[i].pos_x == game.pacman.pos_x && game.ghosts[i].pos_y == game.pacman.pos_y) {
             game.game_over = true;
-            set_timer_slot(SLOT_GAME_OVER_DURATION, GetTime());
+            set_timer_slot(SLOT_ROUND_END_DURATION, GetTime());
         }
 }

@@ -10,7 +10,7 @@ bool is_wall(int pos_y, int pos_x) {
 
 bool is_ghost(int pos_y, int pos_x) {
     for (int i = 0; i < game.ghosts_amount; i++)
-        if (game.ghosts[i].pos_y == pos_y && game.ghosts[i].pos_x == pos_x)
+        if (game.ghosts[i].pos_y == pos_y && game.ghosts[i].pos_x == pos_x && !game.ghosts[i].is_eaten)
             return true;
     return false;
 }

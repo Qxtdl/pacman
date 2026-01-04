@@ -33,6 +33,7 @@ void load_assets(void) {
 }
 
 void load_map(
+    const char *filename, // "assets/map.txt"
     char (*map)[MAX_MAP_HEIGHT][MAX_MAP_WIDTH], 
     int *map_height,
     int *map_width,
@@ -40,7 +41,9 @@ void load_map(
     int *pacman_pos_y,
     int *game_max_points
 ) {
-    FILE *file = fopen("assets/map.txt", "r");
+    FILE *file = fopen(filename, "r");
+    if (!file)
+        quick_abort("You have completed all levels. There is nothing left to do")
     fseek(file, 0, SEEK_END);
     long file_size = ftell(file);
     rewind(file);
@@ -73,4 +76,5 @@ void load_map(
             break;
     }
     *map_height = i + 1, *map_width = j;
+    free(map_txt);
 }
