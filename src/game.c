@@ -13,12 +13,13 @@
 #define MAX_LEVEL_FILENAME_LENGTH 32
 
 struct game game = {0};
+struct session session = {0};
 
 void game_setup(void) {
     char buf[MAX_LEVEL_FILENAME_LENGTH] = {0};
     strcpy(buf, "assets/");
     strcat(buf, "level");
-    sprintf(buf + strlen(buf), "%d", game.current_level);
+    sprintf(buf + strlen(buf), "%d", session.current_level);
     strcat(buf, ".txt");
 
     init_timer_slot(TIMER_SLOT_AMOUNT);
@@ -27,6 +28,13 @@ void game_setup(void) {
 }
 
 void game_tick(void) {
+    if (IsKeyPressed(KEY_G))
+        session.is_debugging = !session.is_debugging;
+    if (IsKeyPressed(KEY_J))
+        session.debugging.ghost_tick = !session.debugging.ghost_tick;
+    if (IsKeyPressed(KEY_K))
+        session.debugging.next_level = !session.debugging.next_level;
+
     if (game.game_over) {
         if (timer_triggered(SLOT_ROUND_END_DURATION, SLOT_ROUND_END_DURATION_VALUE) || IsKeyPressed(KEY_SPACE)) {
             memset(&game, 0, sizeof(game));
@@ -36,30 +44,22 @@ void game_tick(void) {
         }
         return;
     }
-
-    if (game.won) {
+    else if (game.level_won) {
         if (timer_triggered(SLOT_ROUND_END_DURATION, SLOT_ROUND_END_DURATION_VALUE) || IsKeyPressed(KEY_SPACE)) {
-            int current_level = game.current_level;
             memset(&game, 0, sizeof(game));
-            game.current_level = current_level + 1;
+            session.current_level++;
             reset_ghosts();
             game_setup();
         }
         return;    
     }
-    if (game.pacman.points == game.max_points || game.debugging && IsKeyPressed(KEY_K)) {
+    if (game.pacman.points == game.max_points || IS_DEBUGGING(next_level)) {
         set_timer_slot(SLOT_ROUND_END_DURATION, GetTime());
-        game.won = true;
+        game.level_won = true;
     }
 
-    if (IsKeyPressed(KEY_G))
-        game.debugging = !game.debugging;
-    static bool do_ghost_tick = true;
-    if (game.debugging && IsKeyPressed(KEY_J))
-        do_ghost_tick = !do_ghost_tick;
-
     pacman_tick();
-    if (do_ghost_tick) ghost_tick();
+    if (!IS_DEBUGGING(ghost_tick)) ghost_tick();
 }
 
 static void draw_map(void) {
@@ -88,7 +88,7 @@ static void draw_map(void) {
                         i * TEXTURE_SCALE, 
                         tint
                     );
-                    if (game.debugging) DrawText(TextFormat("%d", game.ghosts[k].state), game.ghosts[k].pos_x * TEXTURE_SCALE, game.ghosts[k].pos_y * TEXTURE_SCALE, TEXTURE_SCALE / 2, WHITE);
+                    if (session.is_debugging) DrawText(TextFormat("%d", game.ghosts[k].state), game.ghosts[k].pos_x * TEXTURE_SCALE, game.ghosts[k].pos_y * TEXTURE_SCALE, TEXTURE_SCALE / 2, WHITE);
                 }
         }
     }
@@ -100,10 +100,11 @@ void game_draw(void) {
 
     draw_map();
     DrawText(TextFormat("Points: %d\nMax Points: %d", game.pacman.points, game.max_points), 0, game.map_height * TEXTURE_SCALE, TEXTURE_SCALE, WHITE);
+    DrawText(TextFormat("Score: %d", session.score), 8 * TEXTURE_SCALE, game.map_height * TEXTURE_SCALE, TEXTURE_SCALE, WHITE);
     if (game.pacman.power_mode) DrawText(TextFormat("ATE A POWER PELLET\nTIME REMAINING: %f\n", (float)get_delta_time(SLOT_PACMAN_POWER_DURATION)), (game.pacman.pos_x - 2) * TEXTURE_SCALE, (game.pacman.pos_y - 1) * TEXTURE_SCALE, TEXTURE_SCALE / 1.5, RED);
     if (game.game_over) DrawText("GAME OVER\nPress space", 0, (game.map_height + 2) * TEXTURE_SCALE, TEXTURE_SCALE, RED);
-    else if (game.won) DrawText("GAME WON!\nPress space -> next level", 0, (game.map_height + 2) * TEXTURE_SCALE, TEXTURE_SCALE, GREEN);
-    if (game.debugging) DrawText("Debugging\nG to exit", 0, (game.map_height + 4) * TEXTURE_SCALE, TEXTURE_SCALE, ORANGE);
+    else if (game.level_won) DrawText("GAME WON!\nPress space -> next level", 0, (game.map_height + 2) * TEXTURE_SCALE, TEXTURE_SCALE, GREEN);
+    if (session.is_debugging) DrawText("Debugging\nG to exit", 0, (game.map_height + 4) * TEXTURE_SCALE, TEXTURE_SCALE, ORANGE);
 
     EndDrawing();
 }

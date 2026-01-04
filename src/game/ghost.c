@@ -8,6 +8,7 @@
 #include "maphelp.h"
 
 extern struct game game;
+extern struct session session;
 
 static void add_ghost(ghost_t ghost) {
     game.ghosts = srealloc(game.ghosts, ++game.ghosts_amount * sizeof(ghost_t));
@@ -113,8 +114,9 @@ void ghost_tick(void) {
         }
 
     for (int i = 0; game.pacman.power_mode && i < game.ghosts_amount; i++)
-        if (game.ghosts[i].pos_y == game.pacman.pos_y && game.ghosts[i].pos_x == game.pacman.pos_x) {
+        if (game.ghosts[i].pos_y == game.pacman.pos_y && game.ghosts[i].pos_x == game.pacman.pos_x && !game.ghosts[i].is_eaten) {
             game.ghosts[i].is_eaten = true;
             set_ghost_state(&game.ghosts[i], STATE_EATEN);
+            session.score += SCORE_GIVE_EAT_GHOST;
         }
 }

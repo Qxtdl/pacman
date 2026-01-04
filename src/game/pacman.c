@@ -8,6 +8,7 @@
 #include "maphelp.h"
 
 extern struct game game;
+extern struct session session;
 
 static inline void pacman_move(int *pos, int new_pos, int axis) {
 
@@ -65,6 +66,7 @@ void pacman_tick(void) {
     if (game.map[game.pacman.pos_y][game.pacman.pos_x] == CELL_POINT) {
         game.map[game.pacman.pos_y][game.pacman.pos_x] = CELL_BACKGROUND;
         game.pacman.points++;
+        session.score += SCORE_GIVE_EAT_POINT;
     }
     else if (game.map[game.pacman.pos_y][game.pacman.pos_x] == CELL_POWER_PELLET) {
         game.map[game.pacman.pos_y][game.pacman.pos_x] = CELL_BACKGROUND;
@@ -80,5 +82,6 @@ void pacman_tick(void) {
         if (!game.ghosts[i].is_eaten && game.ghosts[i].pos_x == game.pacman.pos_x && game.ghosts[i].pos_y == game.pacman.pos_y) {
             game.game_over = true;
             set_timer_slot(SLOT_ROUND_END_DURATION, GetTime());
+            session.score -= SCORE_LOSE_LOST;
         }
 }
