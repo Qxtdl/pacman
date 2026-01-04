@@ -5,6 +5,7 @@ This is a recreation of pacman made with C + Raylib
 - [x] Add map
 - [x] Add pacman
 - [x] Add ghosts
+- [x] Remember movement key
 - [ ] Smooth movement
 - [ ] Pacman rotates
-- [ ] Improve pathfinding
+- [x] Improve pathfinding
