@@ -38,5 +38,6 @@ extern struct timer timer;
 
 void init_timer_slot(size_t size);
 bool timer_triggered(timer_slot_t slot, double interval);
-double get_delta_time(timer_slot_t slot);
 void set_timer_slot(timer_slot_t slot, double time);
+double get_timer_slot_delta(timer_slot_t slot);
+double get_delta_time(timer_slot_t slot);

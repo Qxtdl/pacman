@@ -12,7 +12,7 @@ struct pacman {
         DIRECTION_MOVE_LEFT,
         DIRECTION_MOVE_DOWN,
         DIRECTION_MOVE_RIGHT
-    } direction, old_direction;
+    } direction, old_direction, real_direction;
 
     int points;
 

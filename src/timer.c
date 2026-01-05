@@ -29,10 +29,14 @@ bool timer_triggered(timer_slot_t slot, double interval) {
     return false;
 }
 
-double get_delta_time(timer_slot_t slot) {
-    return GetTime() - timer_slots[slot];
-}
-
 void set_timer_slot(timer_slot_t slot, double time) {
     timer_slots[slot] = time;
+}
+
+double get_timer_slot_delta(timer_slot_t slot) {
+    return timer_slots[slot] - GetTime();
+}
+
+double get_delta_time(timer_slot_t slot) {
+    return GetTime() - timer_slots[slot];
 }

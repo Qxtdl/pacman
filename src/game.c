@@ -1,9 +1,11 @@
 #include <raylib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include "game.h"
 #include "assets.h"
+#include "global.h"
 #include "texture_index.h"
 #include "timer.h"
 #include "colors.h"
@@ -74,8 +76,32 @@ static void draw_map(void) {
                 case CELL_POWER_PELLET: DrawCircle(j * TEXTURE_SCALE + 15, i * TEXTURE_SCALE + 15, TEXTURE_SCALE / 3.0f, WHITE); break; // todo: make it change size
                 default: DrawTexture(resources.textures[TEXTURE_ERROR], j * TEXTURE_SCALE, i * TEXTURE_SCALE, WHITE); break;
             }
-            if (i == game.pacman.pos_y && j == game.pacman.pos_x)
-                DrawTexture(resources.textures[game.pacman.sprite_state], j * TEXTURE_SCALE, i * TEXTURE_SCALE, WHITE);
+            if (i == game.pacman.pos_y && j == game.pacman.pos_x) {
+                // DrawTexture(resources.textures[game.pacman.sprite_state], j * TEXTURE_SCALE, i * TEXTURE_SCALE, WHITE);
+
+                /*
+                    formula
+
+                    use abs() to wrap delta?
+
+                    d = get_timer_slot_delta
+                    j = x axis
+                    t = TEXTURE_SCALE
+
+                    d * t + j * t
+                */
+
+                int pos_y = game.pacman.pos_y * TEXTURE_SCALE, pos_x = game.pacman.pos_x * TEXTURE_SCALE;
+                switch (game.pacman.real_direction) {
+                    case DIRECTION_NULL: break;
+                    case DIRECTION_MOVE_UP: pos_y = get_timer_slot_delta(SLOT_PACMAN_MOVE) * TEXTURE_SCALE + i * TEXTURE_SCALE; break;
+                    case DIRECTION_MOVE_LEFT: pos_x = get_timer_slot_delta(SLOT_PACMAN_MOVE) * TEXTURE_SCALE + j * TEXTURE_SCALE; break;
+                    case DIRECTION_MOVE_DOWN: pos_y = fabs(get_timer_slot_delta(SLOT_PACMAN_MOVE)) * TEXTURE_SCALE + i * TEXTURE_SCALE; break;
+                    case DIRECTION_MOVE_RIGHT: pos_x = fabs(get_timer_slot_delta(SLOT_PACMAN_MOVE)) * TEXTURE_SCALE + j * TEXTURE_SCALE; break;
+                    default: app_abort("draw_map()", "Unknown pacman direction")
+                }
+                DrawTexture(resources.textures[game.pacman.sprite_state], pos_x, pos_y, WHITE);
+            }
             
             for (int k = 0; k < game.ghosts_amount; k++)
                 if (game.ghosts[k].pos_x == j && game.ghosts[k].pos_y == i) {

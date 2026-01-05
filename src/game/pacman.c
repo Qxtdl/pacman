@@ -7,8 +7,7 @@
 #include "ghost.h"
 #include "maphelp.h"
 
-static inline void pacman_move(int *pos, int new_pos, int axis) {
-
+static inline void pacman_move(int *pos, int new_pos) {
     *pos = new_pos;
 }
 
@@ -51,6 +50,10 @@ void pacman_tick(void) {
             retried = true;
             goto retry;
         }
+        if (!is_wall(new_pos_y, new_pos_x))
+            game.pacman.real_direction = direction;
+        else
+            game.pacman.real_direction = DIRECTION_NULL;
     }
 
     if (timer_triggered(SLOT_PACMAN_POWER_DURATION, SLOT_PACMAN_POWER_DURATION_VALUE)) {
