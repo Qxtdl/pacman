@@ -4,6 +4,15 @@
 #include "timer.h"
 #include "util.h"
 
+struct timer timer = {
+    .pacman_move_interval = 0.3,
+    .ghost_move_interval = 0.3,
+    .ghost_move_interval_frightened = 0.3,
+    .pacman_sprite_state_interval = 0.2,
+    .pacman_power_duration_interval = 15,
+    .round_end_duration_interval = 4
+};
+
 static double *timer_slots = NULL;
 
 void init_timer_slot(size_t size) {

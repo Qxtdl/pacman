@@ -7,9 +7,6 @@
 #include "../timer.h"
 #include "maphelp.h"
 
-extern struct game game;
-extern struct session session;
-
 static void add_ghost(ghost_t ghost) {
     game.ghosts = srealloc(game.ghosts, ++game.ghosts_amount * sizeof(ghost_t));
     game.ghosts[game.ghosts_amount - 1] = ghost;

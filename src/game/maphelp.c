@@ -2,8 +2,6 @@
 
 #include "../game.h"
 
-extern struct game game;
-
 bool is_wall(int pos_y, int pos_x) {
     return game.map[pos_y][pos_x] == CELL_WALL;
 }

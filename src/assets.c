@@ -1,10 +1,12 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <raylib.h>
 
 #include "global.h"
 #include "util.h"
 #include "game.h"
+#include "timer.h"
 
 struct {
     Texture2D *textures;
@@ -51,11 +53,28 @@ void load_map(
     size_t read_size = fread(map_txt, 1, file_size, file);
     if ((long)read_size != file_size)
         app_abort("load_map()", "Error reading map.txt")
-    map_txt[file_size] = '\0';
     fclose(file);
+    map_txt[file_size] = '\0';
+
+    /*
+        Process map config
+
+        ghost_speed
+        ghost_frightened_speed
+    */
+
+    char *interval = strstr(map_txt, "ghost_speed=");
+    if (interval) timer.ghost_move_interval = strtod(interval + strlen("ghost_speed=") + 1, NULL);
+    else app_abort("load_map()", "No ghost_speed attribute")
+    interval = strstr(map_txt, "ghost_speed_frightened=");
+    if (interval) timer.ghost_move_interval_frightened = strtod(interval + strlen("ghost_speed_frightened=") + 1, NULL);
+
+    if (!strstr(map_txt, "#"))
+        app_abort("load_map()", "Map is missing #")
 
     int i = 0, j = 0;
-    char *cell = strtok(map_txt, ",");
+    char *cell = strtok(strstr(map_txt, "#") + 1, ",");
+    cell = strtok(NULL, ",");
     while (1) {
         if (i > MAX_MAP_HEIGHT - 1 || j > MAX_MAP_WIDTH - 1)
             app_abort("load_map()", "Buffer overflow writing in map: %d %d", i, j)

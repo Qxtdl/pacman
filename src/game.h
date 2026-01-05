@@ -18,7 +18,7 @@
 #define IS_DEBUGGING(x) (session.debugging.x && session.is_debugging)
 #define IS_DEBUGGING_ONCE(x) (!(session.debugging.x = false) && session.is_debugging)
 
-struct session {
+extern struct session {
     int current_level;
     int score;
 
@@ -28,9 +28,9 @@ struct session {
             ghost_tick,
             next_level;
     } debugging;
-};
+} session;
 
-struct game {
+extern struct game {
     struct pacman pacman;
     ghost_t *ghosts;
     int ghosts_amount;
@@ -40,7 +40,7 @@ struct game {
 
     int max_points;
     bool level_won, game_over;
-};
+} game;
 
 enum {
     CELL_BACKGROUND,

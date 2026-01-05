@@ -14,15 +14,27 @@ typedef enum {
     TIMER_SLOT_AMOUNT
 } timer_slot_t;
 
-#define SLOT_PACMAN_MOVE_VALUE 0.3
+extern struct timer {
+    double
+        pacman_move_interval,
+        ghost_move_interval,
+        ghost_move_interval_frightened,
+        pacman_sprite_state_interval,
+        pacman_power_duration_interval,
+        round_end_duration_interval;
+} timer;
 
-#define SLOT_GHOST_MOVE_VALUE 0.3
-#define SLOT_GHOST_MOVE_VALUE_FRIGHTENED 0.3
+extern struct timer timer;
 
-#define SLOT_PACMAN_SPRITE_STATE_VALUE 0.2
-#define SLOT_PACMAN_POWER_DURATION_VALUE 15
+#define SLOT_PACMAN_MOVE_VALUE (timer.pacman_move_interval)
 
-#define SLOT_ROUND_END_DURATION_VALUE 4
+#define SLOT_GHOST_MOVE_VALUE (timer.ghost_move_interval)
+#define SLOT_GHOST_MOVE_VALUE_FRIGHTENED (timer.ghost_move_interval_frightened)
+
+#define SLOT_PACMAN_SPRITE_STATE_VALUE (timer.pacman_sprite_state_interval)
+#define SLOT_PACMAN_POWER_DURATION_VALUE (timer.pacman_power_duration_interval)
+
+#define SLOT_ROUND_END_DURATION_VALUE (timer.round_end_duration_interval)
 
 void init_timer_slot(size_t size);
 bool timer_triggered(timer_slot_t slot, double interval);

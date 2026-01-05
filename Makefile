@@ -9,9 +9,11 @@ OUTPUT_ARGS =
 CSRCS = $(shell find src -name '*.c')
 OBJS = $(patsubst %.c,$(BUILD)/%.o,$(CSRCS))
 
-all: clean $(OBJS) $(OUTPUT) assets run
+all: clean compile run
 
 force:
+
+compile: $(OBJS) $(OUTPUT) assets
 
 $(BUILD)/%.o : %.c
 	@mkdir -p $(dir $@)

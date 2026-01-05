@@ -7,9 +7,6 @@
 #include "ghost.h"
 #include "maphelp.h"
 
-extern struct game game;
-extern struct session session;
-
 static inline void pacman_move(int *pos, int new_pos, int axis) {
 
     *pos = new_pos;
@@ -83,5 +80,6 @@ void pacman_tick(void) {
             game.game_over = true;
             set_timer_slot(SLOT_ROUND_END_DURATION, GetTime());
             session.score -= SCORE_LOSE_LOST;
+            session.score -= game.pacman.points;
         }
 }
