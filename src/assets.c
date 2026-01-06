@@ -44,8 +44,10 @@ void load_map(
     int *game_max_points
 ) {
     FILE *file = fopen(filename, "r");
-    if (!file)
-        quick_abort("You have completed all levels. There is nothing left to do")
+    if (!file) {
+        game.won = true;
+        return;
+    }
     fseek(file, 0, SEEK_END);
     long file_size = ftell(file);
     rewind(file);

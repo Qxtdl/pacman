@@ -39,7 +39,7 @@ extern struct game {
     char map[MAX_MAP_HEIGHT][MAX_MAP_WIDTH];
 
     int max_points;
-    bool level_won, game_over;
+    bool won, level_won, game_over;
 } game;
 
 enum {

@@ -30,6 +30,8 @@ void game_setup(void) {
 }
 
 void game_tick(void) {
+    if (game.won) return;
+
     if (IsKeyPressed(KEY_G))
         session.is_debugging = !session.is_debugging;
     if (IsKeyPressed(KEY_J))
@@ -77,20 +79,6 @@ static void draw_map(void) {
                 default: DrawTexture(resources.textures[TEXTURE_ERROR], j * TEXTURE_SCALE, i * TEXTURE_SCALE, WHITE); break;
             }
             if (i == game.pacman.pos_y && j == game.pacman.pos_x) {
-                // DrawTexture(resources.textures[game.pacman.sprite_state], j * TEXTURE_SCALE, i * TEXTURE_SCALE, WHITE);
-
-                /*
-                    formula
-
-                    use abs() to wrap delta?
-
-                    d = get_timer_slot_delta
-                    j = x axis
-                    t = TEXTURE_SCALE
-
-                    d * t + j * t
-                */
-
                 int pos_y = game.pacman.pos_y * TEXTURE_SCALE, pos_x = game.pacman.pos_x * TEXTURE_SCALE;
                 switch (game.pacman.real_direction) {
                     case DIRECTION_NULL: break;
@@ -100,7 +88,10 @@ static void draw_map(void) {
                     case DIRECTION_MOVE_RIGHT: pos_x = fabs(get_timer_slot_delta(SLOT_PACMAN_MOVE)) * TEXTURE_SCALE + j * TEXTURE_SCALE; break;
                     default: app_abort("draw_map()", "Unknown pacman direction")
                 }
-                DrawTexture(resources.textures[game.pacman.sprite_state], pos_x, pos_y, WHITE);
+                DrawTexture(resources.textures[game.pacman.sprite_state], 
+                    game.game_over ? game.pacman.pos_x * TEXTURE_SCALE : pos_x, 
+                    game.game_over ? game.pacman.pos_y * TEXTURE_SCALE: pos_y, 
+                    WHITE);
             }
             
             for (int k = 0; k < game.ghosts_amount; k++)
@@ -125,11 +116,13 @@ void game_draw(void) {
     ClearBackground(BLACK);
 
     draw_map();
+
     DrawText(TextFormat("Points: %d\nMax Points: %d", game.pacman.points, game.max_points), 0, game.map_height * TEXTURE_SCALE, TEXTURE_SCALE, WHITE);
     DrawText(TextFormat("Score: %d", session.score), 8 * TEXTURE_SCALE, game.map_height * TEXTURE_SCALE, TEXTURE_SCALE, WHITE);
     if (game.pacman.power_mode) DrawText(TextFormat("ATE A POWER PELLET\nTIME REMAINING: %f\n", (float)get_delta_time(SLOT_PACMAN_POWER_DURATION)), (game.pacman.pos_x - 2) * TEXTURE_SCALE, (game.pacman.pos_y - 1) * TEXTURE_SCALE, TEXTURE_SCALE / 1.5, RED);
     if (game.game_over) DrawText("GAME OVER\nPress space", 0, (game.map_height + 2) * TEXTURE_SCALE, TEXTURE_SCALE, RED);
-    else if (game.level_won) DrawText("GAME WON!\nPress space -> next level", 0, (game.map_height + 2) * TEXTURE_SCALE, TEXTURE_SCALE, GREEN);
+    if (game.level_won) DrawText("GAME WON!\nPress space -> next level", 0, (game.map_height + 2) * TEXTURE_SCALE, TEXTURE_SCALE, GREEN);
+    if (game.won) DrawText(TextFormat("YOU\nWON\n%d POINTS", session.score), GetScreenWidth() / 2, GetScreenHeight() / 2, TEXTURE_SCALE, GREEN);
     if (session.is_debugging) DrawText("Debugging\nG to exit", 0, (game.map_height + 4) * TEXTURE_SCALE, TEXTURE_SCALE, ORANGE);
 
     EndDrawing();
