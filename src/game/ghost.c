@@ -67,7 +67,7 @@ static void ghost_moveto(ghost_t *ghost, int pos_y, int pos_x) {
     }
 
     if (ghost->pos_y == lookup_ghost_target(ghost, ghost->state, 0) && ghost->pos_x == lookup_ghost_target(ghost, ghost->state, 1)) {
-        if (!ghost->is_eaten)
+        if (ghost->state != STATE_EATEN)
             set_ghost_state(ghost, ghost->old_state);
         else if (ghost->is_eaten) {
             ghost->is_eaten = false;
@@ -112,7 +112,8 @@ void ghost_tick(void) {
                 game.ghosts[i].new_state = false;
         }
 
-    for (int i = 0; game.pacman.power_mode && i < game.ghosts_amount; i++)
+    if (game.pacman.power_mode)
+    for (int i = 0; i < game.ghosts_amount; i++)
         if (game.ghosts[i].pos_y == game.pacman.pos_y && game.ghosts[i].pos_x == game.pacman.pos_x && !game.ghosts[i].is_eaten) {
             game.ghosts[i].is_eaten = true;
             set_ghost_state(&game.ghosts[i], STATE_EATEN);
