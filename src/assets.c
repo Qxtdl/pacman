@@ -3,16 +3,15 @@
 #include <string.h>
 #include <raylib.h>
 
+#include "assets.h"
 #include "global.h"
 #include "util.h"
 #include "game.h"
 #include "timer.h"
 
-struct {
-    Texture2D *textures;
-} resources;
+struct resources resources;
 
-void load_texture(const char *filename, int newWidth, int newHeight) {
+static void load_texture(const char *filename, int newWidth, int newHeight) {
     static unsigned long i = 0;
     Image image = LoadImage(filename);
     if (newWidth != 0 && newHeight  != 0)
@@ -22,7 +21,15 @@ void load_texture(const char *filename, int newWidth, int newHeight) {
     resources.textures[i - 1] = texture;
 }
 
+static void load_audio(const char *filename) {
+    static unsigned long i = 0;
+    Sound sound = LoadSound(filename);
+    resources.sounds = srealloc(resources.sounds, ++i * sizeof(Sound));
+    resources.sounds[i - 1] = sound;
+}
+
 void load_assets(void) {
+    /* TEXTURES */
     // pacman
     load_texture("assets/textures/pacman/pacOpen.png", TEXTURE_SCALE, TEXTURE_SCALE);
     load_texture("assets/textures/pacman/pacClosed.png", TEXTURE_SCALE, TEXTURE_SCALE);
@@ -32,6 +39,14 @@ void load_assets(void) {
 
     // error
     load_texture("assets/textures/error.png", TEXTURE_SCALE, TEXTURE_SCALE);
+
+    /* SOUNDS */
+    load_audio("assets/sounds/pacman_chomp.wav");
+    load_audio("assets/sounds/pacman_death.wav");
+    load_audio("assets/sounds/pacman_eatfruit.wav");
+    load_audio("assets/sounds/pacman_eatghost.wav");
+    load_audio("assets/sounds/pacman_extrapac.wav");
+    load_audio("assets/sounds/pacman_intermission.wav");
 }
 
 void load_map(

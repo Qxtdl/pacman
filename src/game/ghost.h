@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 
-#include "../texture_index.h"
+#include "../asset_index.h"
 
 enum state {
     STATE_NULL,

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../texture_index.h"
+#include "../asset_index.h"
 
 struct pacman {
     texture_index_t sprite_state;

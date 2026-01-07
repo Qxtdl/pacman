@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 
-#include "texture_index.h"
+#include "asset_index.h"
 #include "game/pacman.h"
 #include "game/ghost.h"
 
@@ -21,6 +21,8 @@
 extern struct session {
     int current_level;
     int score;
+
+    bool play_sound;
 
     bool is_debugging;
     struct {

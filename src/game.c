@@ -6,12 +6,13 @@
 #include "game.h"
 #include "assets.h"
 #include "global.h"
-#include "texture_index.h"
+#include "asset_index.h"
 #include "timer.h"
 #include "colors.h"
 #include "game/pacman.h"
 #include "game/ghost.h"
 #include "game/tunnel.h"
+#include "sound.h"
 
 #define MAX_LEVEL_FILENAME_LENGTH 32
 
@@ -28,6 +29,7 @@ void game_setup(void) {
     init_timer_slot(TIMER_SLOT_AMOUNT);
     load_map(buf, &game.map, &game.map_height, &game.map_width, &game.pacman.pos_x, &game.pacman.pos_y, &game.max_points);
     ghosts_setup();
+    play_sound(resources.sounds[SOUND_PACMAN_EXTRAPAC]);
 }
 
 void game_tick(void) {
@@ -39,13 +41,16 @@ void game_tick(void) {
         session.debugging.ghost_tick = !session.debugging.ghost_tick;
     if (IsKeyPressed(KEY_K))
         session.debugging.next_level = !session.debugging.next_level;
+    if (IsKeyPressed(KEY_M))
+        session.play_sound = !session.play_sound;
 
     if (game.game_over) {
         if (timer_triggered(SLOT_ROUND_END_DURATION, SLOT_ROUND_END_DURATION_VALUE) || IsKeyPressed(KEY_SPACE)) {
-            memset(&game, 0, sizeof(game));
             game.game_over = false;
+            memset(&game, 0, sizeof(game));
             reset_ghosts();
             game_setup();
+            play_sound(resources.sounds[SOUND_PACMAN_INTERMISSION]);
         }
         return;
     }

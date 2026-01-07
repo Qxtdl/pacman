@@ -6,6 +6,8 @@
 #include "../game.h"
 #include "../timer.h"
 #include "maphelp.h"
+#include "../assets.h"
+#include "../sound.h"
 
 static void add_ghost(ghost_t ghost) {
     game.ghosts = srealloc(game.ghosts, ++game.ghosts_amount * sizeof(ghost_t));
@@ -115,5 +117,6 @@ void ghost_tick(void) {
             game.ghosts[i].is_eaten = true;
             set_ghost_state(&game.ghosts[i], STATE_EATEN);
             session.score += SCORE_GIVE_EAT_GHOST;
+            play_sound(resources.sounds[SOUND_PACMAN_EATGHOST])
         }
 }

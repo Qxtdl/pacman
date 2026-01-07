@@ -4,11 +4,11 @@
 
 #include "game.h"
 
-extern struct {
+extern struct resources {
     Texture2D *textures;
+    Sound *sounds;
 } resources;
 
-void load_texture(const char *filename);
 void load_assets(void);
 void load_map(
     const char *filename,

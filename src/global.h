@@ -15,4 +15,4 @@
       exit(1); \
    }
 
-#define NOT_IMPLEMENTED quick_abort("NOT IMPLEMENTED!")
+#define NOT_IMPLEMENTED(x) quick_abort("NOT IMPLEMENTED! " #x)
