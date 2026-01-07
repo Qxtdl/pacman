@@ -7,10 +7,6 @@
 #include "ghost.h"
 #include "maphelp.h"
 
-static inline void pacman_move(int *pos, int new_pos) {
-    *pos = new_pos;
-}
-
 static inline void set_pacman_direction(enum direction direction) {
     game.pacman.old_direction = game.pacman.direction;
     game.pacman.direction = direction;

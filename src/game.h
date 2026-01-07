@@ -42,12 +42,15 @@ extern struct game {
     bool won, level_won, game_over;
 } game;
 
-enum {
+enum cell_type {
     CELL_BACKGROUND,
     CELL_WALL,
 
     CELL_PACMAN_SPAWN,
     CELL_GHOST_SPAWNER,
+
+    CELL_Y_TUNNEL,
+    CELL_X_TUNNEL,
     
     CELL_POINT,
     CELL_POWER_PELLET

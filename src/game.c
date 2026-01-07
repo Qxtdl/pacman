@@ -11,6 +11,7 @@
 #include "colors.h"
 #include "game/pacman.h"
 #include "game/ghost.h"
+#include "game/tunnel.h"
 
 #define MAX_LEVEL_FILENAME_LENGTH 32
 
@@ -64,6 +65,10 @@ void game_tick(void) {
 
     pacman_tick();
     if (!IS_DEBUGGING(ghost_tick)) ghost_tick();
+
+    tunnel_entity(&game.pacman.pos_y, &game.pacman.pos_x);
+    for (int i = 0; i < game.ghosts_amount; i++)
+        tunnel_entity(&game.ghosts[i].pos_y, &game.ghosts[i].pos_x);
 }
 
 static void draw_map(void) {
@@ -72,6 +77,8 @@ static void draw_map(void) {
             switch (game.map[i][j]) {
                 case CELL_PACMAN_SPAWN:
                 case CELL_GHOST_SPAWNER:
+                case CELL_Y_TUNNEL:
+                case CELL_X_TUNNEL:
                 case CELL_BACKGROUND: DrawRectangle( j * TEXTURE_SCALE, i * TEXTURE_SCALE, TEXTURE_SCALE, TEXTURE_SCALE, BLACK); break;
                 case CELL_WALL: DrawRectangle( j * TEXTURE_SCALE, i * TEXTURE_SCALE, TEXTURE_SCALE, TEXTURE_SCALE, WALL_COLOR); break;
                 case CELL_POINT: DrawCircle(j * TEXTURE_SCALE + 15, i * TEXTURE_SCALE + 15, TEXTURE_SCALE / 4.0f, WHITE); break;

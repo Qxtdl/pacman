@@ -19,13 +19,12 @@ typedef struct {
 
     int pos_x, pos_y;
     int spawn_pos_x, spawn_pos_y;
-    bool enroute_to_target;
     int move_to_target_pos_y, move_to_target_pos_x;
 
+    bool goto_target;
+
     enum state state, old_state;
-
     bool new_state;
-
     int state_vector[STATE_AMOUNT][2];
 
     bool is_eaten;
@@ -35,4 +34,3 @@ void ghosts_setup(void);
 void reset_ghosts(void);
 void set_ghost_state(ghost_t *ghost, enum state state);
 void ghost_tick(void);
-char *print_state(enum state state);
