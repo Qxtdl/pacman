@@ -19,10 +19,9 @@
 #define IS_DEBUGGING_ONCE(x) (!(session.debugging.x = false) && session.is_debugging)
 
 extern struct session {
+    bool paused;
     int current_level;
     int score;
-
-    bool play_sound;
 
     bool is_debugging;
     struct {

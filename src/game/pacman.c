@@ -7,7 +7,6 @@
 #include "ghost.h"
 #include "maphelp.h"
 #include "../assets.h"
-#include "../sound.h"
 
 static inline void set_pacman_direction(enum direction direction) {
     game.pacman.old_direction = game.pacman.direction;
@@ -58,25 +57,25 @@ void pacman_tick(void) {
         game.map[game.pacman.pos_y][game.pacman.pos_x] = CELL_BACKGROUND;
         game.pacman.points++;
         session.score += SCORE_GIVE_EAT_POINT;
-        play_sound(resources.sounds[SOUND_PACMAN_CHOMP]);
+        PlaySound(resources.sounds[SOUND_PACMAN_CHOMP]);
     }
 
     if (timer_triggered(SLOT_PACMAN_POWER_DURATION, SLOT_PACMAN_POWER_DURATION_VALUE)) {
         game.pacman.power_mode = false;
 
         for (int i = 0; i < game.ghosts_amount; i++)
-            if (!game.ghosts[i].is_eaten) set_ghost_state(&game.ghosts[i], STATE_CHASE);
+            if (!game.ghosts[i].is_eaten) ghost_set_state(&game.ghosts[i], STATE_CHASE);
     }
     if (game.map[game.pacman.pos_y][game.pacman.pos_x] == CELL_POWER_PELLET) {
         game.map[game.pacman.pos_y][game.pacman.pos_x] = CELL_BACKGROUND;
         game.pacman.power_mode = true;
 
         for (int i = 0; i < game.ghosts_amount; i++)
-            if (!game.ghosts[i].is_eaten) set_ghost_state(&game.ghosts[i], STATE_FRIGHTENED);
+            if (!game.ghosts[i].is_eaten) ghost_set_state(&game.ghosts[i], STATE_FRIGHTENED);
 
         set_timer_slot(SLOT_PACMAN_POWER_DURATION, GetTime());
-        play_sound(resources.sounds[SOUND_PACMAN_EATFRUIT])
-        play_sound(resources.sounds[SOUND_PACMAN_EXTRAPAC])
+        PlaySound(resources.sounds[SOUND_PACMAN_EATFRUIT]);
+        PlaySound(resources.sounds[SOUND_PACMAN_EXTRAPAC]);
     }
 
     for (int i = 0; !game.pacman.power_mode && i < game.ghosts_amount; i++)
@@ -85,7 +84,6 @@ void pacman_tick(void) {
             set_timer_slot(SLOT_ROUND_END_DURATION, GetTime());
             session.score -= SCORE_LOSE_LOST;
             session.score -= game.pacman.points;
-
-            play_sound(resources.sounds[SOUND_PACMAN_DEATH]);
+            PlaySound(resources.sounds[SOUND_PACMAN_DEATH]);
         }
 }

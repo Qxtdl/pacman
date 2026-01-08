@@ -7,7 +7,6 @@
 #include "../timer.h"
 #include "maphelp.h"
 #include "../assets.h"
-#include "../sound.h"
 
 static void add_ghost(ghost_t ghost) {
     game.ghosts = srealloc(game.ghosts, ++game.ghosts_amount * sizeof(ghost_t));
@@ -20,7 +19,7 @@ void ghosts_setup(void) {
     for (int i = 0; i < game.map_height; i++)
         for (int j = 0; j < game.map_width; j++)
             if (game.map[i][j] == CELL_GHOST_SPAWNER)
-                add_ghost((ghost_t){TEXTURE_GHOST, j, i, 0, 0, 0, 0, false, STATE_CHASE, STATE_CHASE, true, {{0}}, false});
+                add_ghost((ghost_t){TEXTURE_GHOST, i, j, i, j, STATE_CHASE, STATE_NULL, false, {{0}}, true, false});
 }
 
 void reset_ghosts(void) {
@@ -29,27 +28,32 @@ void reset_ghosts(void) {
     game.ghosts_amount = 0;
 }
 
-void set_ghost_state(ghost_t *ghost, enum state state) {
+void ghost_set_state(ghost_t *ghost, enum state state) {
     ghost->new_state = true;
     ghost->old_state = ghost->state;
     ghost->state = state;
 }
 
 static inline void ghost_set_target(ghost_t *ghost,  enum state state,  int pos_y, int pos_x) {
+    if (!ghost->reached_vector) return;
+    ghost->reached_vector = false;
     ghost->state_vector[state][0] = pos_y;
     ghost->state_vector[state][1] = pos_x;
 }
 
-static inline int lookup_ghost_target(ghost_t *ghost, enum state state, bool axis)  {
+static inline void ghost_set_target_now(ghost_t *ghost, enum state state, int pos_y, int pos_x) {
+    if (!ghost->reached_vector) return;
+    ghost->state_vector[state][0] = pos_y;
+    ghost->state_vector[state][1] = pos_x;
+}
+
+static inline int lookup_ghost_target(ghost_t *ghost, enum state state, int axis)  {
     return ghost->state_vector[state][axis];
 }
 
-static void ghost_moveto(ghost_t *ghost, int pos_y, int pos_x) {
-    if (ghost->new_state)
-        ghost_set_target(ghost, ghost->state, pos_y, pos_x);
-
-    int pos_y_diff = ((ghost->new_state | ghost->goto_target) ? lookup_ghost_target(ghost, ghost->state, 0) : pos_y) - ghost->pos_y,
-        pos_x_diff = ((ghost->new_state | ghost->goto_target) ? lookup_ghost_target(ghost, ghost->state, 1) : pos_x) - ghost->pos_x;
+static void ghost_moveto_target(ghost_t *ghost) {
+    int pos_y_diff = lookup_ghost_target(ghost, ghost->state, 0) - ghost->pos_y,
+        pos_x_diff = lookup_ghost_target(ghost, ghost->state, 1) - ghost->pos_x;
 
     if (pos_x_diff > 0 && (!is_wall_or_ghost(ghost->pos_y, ghost->pos_x + 1) || ghost->is_eaten))
         ghost->pos_x++;
@@ -60,21 +64,20 @@ static void ghost_moveto(ghost_t *ghost, int pos_y, int pos_x) {
     else if (pos_y_diff < 0 && (!is_wall_or_ghost(ghost->pos_y  -  1, ghost->pos_x) || ghost->is_eaten))
         ghost->pos_y--;
     else {
-        if (ghost->state != STATE_SCATTER)
-            set_ghost_state(ghost, STATE_SCATTER);
+        if (!ghost->is_eaten && ghost->state != STATE_SCATTER)
+            ghost_set_state(ghost, STATE_SCATTER);
         else if (ghost->state == STATE_SCATTER)
-            set_ghost_state(ghost, ghost->old_state);
+            ghost_set_state(ghost, ghost->old_state);
     }
 
     if (ghost->pos_y == lookup_ghost_target(ghost, ghost->state, 0) && ghost->pos_x == lookup_ghost_target(ghost, ghost->state, 1)) {
+        ghost->reached_vector = true;
         if (ghost->state != STATE_EATEN)
-            set_ghost_state(ghost, ghost->old_state);
+            ghost_set_state(ghost, ghost->old_state);
         else if (ghost->is_eaten) {
             ghost->is_eaten = false;
-            set_ghost_state(ghost, STATE_CHASE);
+            ghost_set_state(ghost, STATE_CHASE);
         }
-
-        if (ghost->goto_target) ghost->goto_target = false;
     }
 }
 
@@ -86,28 +89,29 @@ void ghost_tick(void) {
                 case STATE_CHASE: {
                     if (game.map[game.pacman.pos_y][game.pacman.pos_x] == CELL_Y_TUNNEL ||
                         game.map[game.pacman.pos_y][game.pacman.pos_x] == CELL_X_TUNNEL)
-                        game.ghosts[i].goto_target = true;
-                    ghost_moveto(&game.ghosts[i], game.pacman.pos_y, game.pacman.pos_x); 
-                    break;
+                        ghost_set_target(&game.ghosts[i], game.ghosts[i].state,game.pacman.pos_y, game.pacman.pos_x);
+                    else 
+                        ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state,game.pacman.pos_y, game.pacman.pos_x);
                 }
+                break;
                 case STATE_FRIGHTENED:
                     if (game.pacman.pos_y == game.ghosts[i].pos_y && game.pacman.pos_x == game.ghosts[i].pos_x + 1)
-                        ghost_moveto(&game.ghosts[i], game.ghosts[i].pos_y, game.ghosts[i].pos_x - 1);
+                        ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state, game.ghosts[i].pos_y, game.ghosts[i].pos_x - 1);
                     else if (game.pacman.pos_y == game.ghosts[i].pos_y && game.pacman.pos_x == game.ghosts[i].pos_x - 1)
-                        ghost_moveto(&game.ghosts[i], game.ghosts[i].pos_y, game.ghosts[i].pos_x + 1);
+                        ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state, game.ghosts[i].pos_y, game.ghosts[i].pos_x + 1);
                     else if (game.pacman.pos_y == game.ghosts[i].pos_y + 1 && game.pacman.pos_x == game.ghosts[i].pos_x)
-                        ghost_moveto(&game.ghosts[i], game.ghosts[i].pos_y - 1, game.ghosts[i].pos_x);
+                        ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state, game.ghosts[i].pos_y - 1, game.ghosts[i].pos_x);
                     else if (game.pacman.pos_y == game.ghosts[i].pos_y - 1 && game.pacman.pos_x == game.ghosts[i].pos_x)
-                        ghost_moveto(&game.ghosts[i], game.ghosts[i].pos_y + 1, game.ghosts[i].pos_x);
-                    else goto moveto_random_map_pos;
+                        ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state, game.ghosts[i].pos_y + 1, game.ghosts[i].pos_x);
+                    else 
+                        ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state, random_int(0, game.map_height - 1), random_int(0, game.map_width - 1));
                     break;
-                case STATE_SCATTER: goto moveto_random_map_pos;
-                case STATE_EATEN: ghost_moveto(&game.ghosts[i], game.ghosts[i].spawn_pos_y, game.ghosts[i].spawn_pos_x); break;
+                case STATE_SCATTER: ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state, random_int(0, game.map_height - 1), random_int(0, game.map_width - 1)); break;
+                case STATE_EATEN: ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state, game.ghosts[i].spawn_pos_y, game.ghosts[i].spawn_pos_x); break;
                 default: app_abort("ghost_tick()", "Unknown ghost state") break;
-
-                moveto_random_map_pos:
-                    ghost_moveto(&game.ghosts[i], random_int(0, game.map_height - 1), random_int(0, game.map_width - 1));
             }
+            ghost_moveto_target(&game.ghosts[i]);
+
             if (game.ghosts[i].new_state)
                 game.ghosts[i].new_state = false;
         }
@@ -116,8 +120,8 @@ void ghost_tick(void) {
     for (int i = 0; i < game.ghosts_amount; i++)
         if (game.ghosts[i].pos_y == game.pacman.pos_y && game.ghosts[i].pos_x == game.pacman.pos_x && !game.ghosts[i].is_eaten) {
             game.ghosts[i].is_eaten = true;
-            set_ghost_state(&game.ghosts[i], STATE_EATEN);
+            ghost_set_state(&game.ghosts[i], STATE_EATEN);
             session.score += SCORE_GIVE_EAT_GHOST;
-            play_sound(resources.sounds[SOUND_PACMAN_EATGHOST])
+            PlaySound(resources.sounds[SOUND_PACMAN_EATGHOST]);
         }
 }
