@@ -5,7 +5,8 @@
 typedef enum {
     SLOT_PACMAN_MOVE,
     SLOT_GHOST_MOVE,
-    
+    SLOT_GHOST_MOVE_FRIGHTHENED,
+
     SLOT_PACMAN_SPRITE_STATE,
     SLOT_PACMAN_POWER_DURATION,
 
@@ -24,9 +25,8 @@ extern struct timer {
         round_end_duration_interval;
 } timer;
 
-extern struct timer timer;
-
 #define SLOT_PACMAN_MOVE_VALUE (timer.pacman_move_interval)
+#define SLOT_PACMAN_FRIGHTENED_MOVE_VALUE (timer.pacman_frightened_move_value)
 
 #define SLOT_GHOST_MOVE_VALUE (timer.ghost_move_interval)
 #define SLOT_GHOST_MOVE_VALUE_FRIGHTENED (timer.ghost_move_interval_frightened)

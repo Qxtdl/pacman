@@ -56,7 +56,7 @@ void pacman_tick(void) {
     if (game.map[game.pacman.pos_y][game.pacman.pos_x] == CELL_POINT) {
         game.map[game.pacman.pos_y][game.pacman.pos_x] = CELL_BACKGROUND;
         game.pacman.points++;
-        session.score += SCORE_GIVE_EAT_POINT;
+        game.round_score += SCORE_GIVE_EAT_POINT;
         PlaySound(resources.sounds[SOUND_PACMAN_CHOMP]);
     }
 
@@ -82,8 +82,7 @@ void pacman_tick(void) {
         if (!game.ghosts[i].is_eaten && game.ghosts[i].pos_x == game.pacman.pos_x && game.ghosts[i].pos_y == game.pacman.pos_y) {
             game.game_over = true;
             set_timer_slot(SLOT_ROUND_END_DURATION, GetTime());
-            session.score -= SCORE_LOSE_LOST;
-            session.score -= game.pacman.points;
+            game.round_score -= SCORE_GIVE_EAT_GHOST * 2;
             PlaySound(resources.sounds[SOUND_PACMAN_DEATH]);
         }
 }

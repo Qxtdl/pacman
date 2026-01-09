@@ -50,8 +50,10 @@ void game_tick(void) {
     }
     else if (game.level_won) {
         if (timer_triggered(SLOT_ROUND_END_DURATION, SLOT_ROUND_END_DURATION_VALUE) || IsKeyPressed(KEY_SPACE)) {
+            int round_score = game.round_score;
             memset(&game, 0, sizeof(game));
             session.current_level++;
+            session.score += round_score;
             reset_ghosts();
             game_setup();
             PlaySound(resources.sounds[SOUND_PACMAN_INTERMISSION]);
@@ -125,8 +127,8 @@ void game_draw(void) {
     draw_map();
 
     DrawText(TextFormat("Points: %d\nMax Points: %d", game.pacman.points, game.max_points), 0, game.map_height * TEXTURE_SCALE, TEXTURE_SCALE, WHITE);
-    DrawText(TextFormat("Score: %d", session.score), 8 * TEXTURE_SCALE, game.map_height * TEXTURE_SCALE, TEXTURE_SCALE, WHITE);
-    if (game.pacman.power_mode) DrawText(TextFormat("ATE A POWER PELLET\nTIME REMAINING: %f\n", (float)get_delta_time(SLOT_PACMAN_POWER_DURATION)), (game.pacman.pos_x - 2) * TEXTURE_SCALE, (game.pacman.pos_y - 1) * TEXTURE_SCALE, TEXTURE_SCALE / 1.5, RED);
+    DrawText(TextFormat("Score: %d Lvl Score: %d", session.score, game.round_score), 8 * TEXTURE_SCALE, game.map_height * TEXTURE_SCALE, TEXTURE_SCALE, WHITE);
+    if (game.pacman.power_mode) DrawText(TextFormat("ATE A POWER PELLET\nTIME REMAINING: %f\n", get_delta_time(SLOT_PACMAN_POWER_DURATION)), (game.pacman.pos_x - 2) * TEXTURE_SCALE, (game.pacman.pos_y - 1) * TEXTURE_SCALE, TEXTURE_SCALE / 1.5, RED);
     if (game.game_over) DrawText("GAME OVER\nPress space", 0, (game.map_height + 2) * TEXTURE_SCALE, TEXTURE_SCALE, RED);
     if (game.level_won) DrawText("GAME WON!\nPress space -> next level", 0, (game.map_height + 2) * TEXTURE_SCALE, TEXTURE_SCALE, GREEN);
     if (game.won) DrawText(TextFormat("YOU\nWON\n%d POINTS", session.score), GetScreenWidth() / 2, GetScreenHeight() / 2, TEXTURE_SCALE, GREEN);

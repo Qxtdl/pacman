@@ -21,7 +21,6 @@ typedef struct {
     int spawn_pos_x, spawn_pos_y;
 
     enum state state, old_state;
-    bool new_state;
     int state_vector[STATE_AMOUNT][2];
     bool reached_vector;
 

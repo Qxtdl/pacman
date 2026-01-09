@@ -40,6 +40,7 @@ extern struct game {
     char map[MAX_MAP_HEIGHT][MAX_MAP_WIDTH];
 
     int max_points;
+    int round_score;
     bool won, level_won, game_over;
 } game;
 

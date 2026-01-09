@@ -3,11 +3,11 @@
 
 #include "assets.h"
 #include "game.h"
-#include <stdio.h>
+
 int main() {    
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(MAX_MAP_HEIGHT * TEXTURE_SCALE, MAX_MAP_WIDTH * TEXTURE_SCALE, "Pacman");
-    SetTargetFPS(120);
+    SetTargetFPS(60);
 
     InitAudioDevice();
 
