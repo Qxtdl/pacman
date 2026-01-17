@@ -8,6 +8,7 @@
 #include "util.h"
 #include "game.h"
 #include "timer.h"
+#include "generate_maze.h"
 
 struct resources resources;
 
@@ -49,19 +50,24 @@ void load_assets(void) {
     load_audio("assets/sounds/pacman_intermission.wav");
 }
 
-void load_map(
+void map_count_max_points(void) {
+    for (int i = 0; i < game.map_height; i++)
+        for (int j = 0; j < game.map_width; j++)
+            if (game.map[i][j] == CELL_POINT) game.max_points++;
+}
+
+bool load_map(
     const char *filename, // "assets/map.txt"
     char (*map)[MAX_MAP_HEIGHT][MAX_MAP_WIDTH], 
     int *map_height,
     int *map_width,
-    int *pacman_pos_x,
     int *pacman_pos_y,
-    int *game_max_points
+    int *pacman_pos_x
 ) {
     FILE *file = fopen(filename, "r");
     if (!file) {
-        game.won = true;
-        return;
+        memcpy(&timer, &original_timer, sizeof(timer));
+        return false;
     }
     fseek(file, 0, SEEK_END);
     long file_size = ftell(file);
@@ -94,7 +100,7 @@ void load_map(
     cell = strtok(NULL, ",");
     while (1) {
         if (i > MAX_MAP_HEIGHT - 1 || j > MAX_MAP_WIDTH - 1)
-            app_abort("load_map()", "Buffer overflow writing in map: %d %d", i, j)
+            app_abort("load_map()", "Your map is too large. Maximum: %d by %d", MAX_MAP_HEIGHT, MAX_MAP_WIDTH)
 
         if (strstr(cell, "\n")) {
             i++, j = 0;
@@ -103,8 +109,6 @@ void load_map(
         unsigned long cell_value = strtoul(cell, NULL, 10);
         if (cell_value == CELL_PACMAN_SPAWN)
             *pacman_pos_y = i, *pacman_pos_x = j;
-        if (cell_value == CELL_POINT)
-            (*game_max_points)++;
         (*map)[i][j++] = cell_value;
     
     do_strtok:
@@ -113,4 +117,18 @@ void load_map(
     }
     *map_height = i + 1, *map_width = j;
     free(map_txt);
+
+    return true;
+}
+
+void generate_map(
+    char (*map)[MAX_MAP_HEIGHT][MAX_MAP_WIDTH], 
+    int *map_height,
+    int *map_width,
+    int *pacman_pos_y,
+    int *pacman_pos_x
+) {
+    generate_maze(map, map_height, map_width);
+    *pacman_pos_x = 1;
+    *pacman_pos_y = 1;
 }

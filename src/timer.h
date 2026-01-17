@@ -25,6 +25,8 @@ extern struct timer {
         round_end_duration_interval;
 } timer;
 
+extern struct timer original_timer;
+
 #define SLOT_PACMAN_MOVE_VALUE (timer.pacman_move_interval)
 #define SLOT_PACMAN_FRIGHTENED_MOVE_VALUE (timer.pacman_frightened_move_value)
 

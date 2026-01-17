@@ -10,12 +10,19 @@ extern struct resources {
 } resources;
 
 void load_assets(void);
-void load_map(
+void map_count_max_points(void);
+bool load_map(
     const char *filename,
     char (*map)[MAX_MAP_HEIGHT][MAX_MAP_WIDTH], 
     int *map_height,
     int *map_width,
     int *pacman_pos_x,
-    int *pacman_pos_y,
-    int *game_max_points
+    int *pacman_pos_y
+);
+void generate_map(
+    char (*map)[MAX_MAP_HEIGHT][MAX_MAP_WIDTH], 
+    int *map_height,
+    int *map_width,
+    int *pacman_pos_x,
+    int *pacman_pos_y
 );

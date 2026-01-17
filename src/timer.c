@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <raylib.h>
 
 #include "timer.h"
@@ -12,6 +13,8 @@ struct timer timer = {
     .pacman_power_duration_interval = 15,
     .round_end_duration_interval = 4
 };
+
+struct timer original_timer;
 
 static double *timer_slots = NULL;
 

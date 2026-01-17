@@ -8,16 +8,16 @@
 #include "maphelp.h"
 #include "../assets.h"
 
-static inline void set_pacman_direction(enum direction direction) {
+static inline void set_pacman_direction(enum pacman_direction direction) {
     game.pacman.old_direction = game.pacman.direction;
     game.pacman.direction = direction;
 }
 
 void pacman_tick(void) { 
-    if (IsKeyDown(KEY_W)) game.pacman.direction = DIRECTION_MOVE_UP;
-    if (IsKeyDown(KEY_A)) game.pacman.direction = DIRECTION_MOVE_LEFT;
-    if (IsKeyDown(KEY_S)) game.pacman.direction = DIRECTION_MOVE_DOWN;
-    if (IsKeyDown(KEY_D)) game.pacman.direction = DIRECTION_MOVE_RIGHT;
+    if (IsKeyDown(KEY_W)) game.pacman.direction = PACMAN_DIRECTION_MOVE_UP;
+    if (IsKeyDown(KEY_A)) game.pacman.direction = PACMAN_DIRECTION_MOVE_LEFT;
+    if (IsKeyDown(KEY_S)) game.pacman.direction = PACMAN_DIRECTION_MOVE_DOWN;
+    if (IsKeyDown(KEY_D)) game.pacman.direction = PACMAN_DIRECTION_MOVE_RIGHT;
 
     if (timer_triggered(SLOT_PACMAN_SPRITE_STATE, SLOT_PACMAN_SPRITE_STATE_VALUE)) {
         if (game.pacman.sprite_state == TEXTURE_PACOPEN)
@@ -27,15 +27,15 @@ void pacman_tick(void) {
 
     if (timer_triggered(SLOT_PACMAN_MOVE, SLOT_PACMAN_MOVE_VALUE)) {
         bool retried = false;
-        enum direction direction = game.pacman.direction;
+        enum pacman_direction direction = game.pacman.direction;
         retry:;
         int new_pos_x = game.pacman.pos_x, new_pos_y = game.pacman.pos_y;
         switch (direction) {
-            case DIRECTION_NULL: break;
-            case DIRECTION_MOVE_UP: new_pos_y = game.pacman.pos_y - 1; break;
-            case DIRECTION_MOVE_LEFT: new_pos_x = game.pacman.pos_x - 1; break;
-            case DIRECTION_MOVE_DOWN: new_pos_y = game.pacman.pos_y + 1; break;
-            case DIRECTION_MOVE_RIGHT: new_pos_x = game.pacman.pos_x + 1; break;
+            case PACMAN_DIRECTION_NULL: break;
+            case PACMAN_DIRECTION_MOVE_UP: new_pos_y = game.pacman.pos_y - 1; break;
+            case PACMAN_DIRECTION_MOVE_LEFT: new_pos_x = game.pacman.pos_x - 1; break;
+            case PACMAN_DIRECTION_MOVE_DOWN: new_pos_y = game.pacman.pos_y + 1; break;
+            case PACMAN_DIRECTION_MOVE_RIGHT: new_pos_x = game.pacman.pos_x + 1; break;
             default: app_abort("pacman_tick()", "Unknown pacman direction")
         }
         if (!is_wall(new_pos_y, new_pos_x)) {
@@ -50,7 +50,7 @@ void pacman_tick(void) {
         if (!is_wall(new_pos_y, new_pos_x))
             game.pacman.real_direction = direction;
         else
-            game.pacman.real_direction = DIRECTION_NULL;
+            game.pacman.real_direction = PACMAN_DIRECTION_NULL;
     }
     
     if (game.map[game.pacman.pos_y][game.pacman.pos_x] == CELL_POINT) {

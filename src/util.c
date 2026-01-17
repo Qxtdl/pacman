@@ -25,7 +25,13 @@ void *scalloc(size_t nmemb, size_t size) {
     return alloc;
 }
 
+// NOTE: if more of these are added make a seperate math.c
+int clamp(int v, int min, int max) {
+    if (v < min) return min;
+    if (v > max) return max;
+    return v;
+}
+
 int random_int(int min, int max) {
-    srand(time(NULL));
     return min + rand() % (max + 1  - min);
 }

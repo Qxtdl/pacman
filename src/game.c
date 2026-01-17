@@ -26,7 +26,9 @@ void game_setup(void) {
     strcat(buf, ".txt");
 
     init_timer_slot(TIMER_SLOT_AMOUNT);
-    load_map(buf, &game.map, &game.map_height, &game.map_width, &game.pacman.pos_x, &game.pacman.pos_y, &game.max_points);
+    if (!load_map(buf, &game.map, &game.map_height, &game.map_width, &game.pacman.pos_y, &game.pacman.pos_x))
+        generate_map(&game.map, &game.map_height, &game.map_width, &game.pacman.pos_y, &game.pacman.pos_x);
+    map_count_max_points();
     ghosts_setup();
 }
 
@@ -90,11 +92,11 @@ static void draw_map(void) {
             if (i == game.pacman.pos_y && j == game.pacman.pos_x) {
                 int pos_y = game.pacman.pos_y * TEXTURE_SCALE, pos_x = game.pacman.pos_x * TEXTURE_SCALE;
                 switch (game.pacman.real_direction) {
-                    case DIRECTION_NULL: break;
-                    case DIRECTION_MOVE_UP: pos_y = get_timer_slot_delta(SLOT_PACMAN_MOVE) * TEXTURE_SCALE + i * TEXTURE_SCALE; break;
-                    case DIRECTION_MOVE_LEFT: pos_x = get_timer_slot_delta(SLOT_PACMAN_MOVE) * TEXTURE_SCALE + j * TEXTURE_SCALE; break;
-                    case DIRECTION_MOVE_DOWN: pos_y = fabs(get_timer_slot_delta(SLOT_PACMAN_MOVE)) * TEXTURE_SCALE + i * TEXTURE_SCALE; break;
-                    case DIRECTION_MOVE_RIGHT: pos_x = fabs(get_timer_slot_delta(SLOT_PACMAN_MOVE)) * TEXTURE_SCALE + j * TEXTURE_SCALE; break;
+                    case PACMAN_DIRECTION_NULL: break;
+                    case PACMAN_DIRECTION_MOVE_UP: pos_y = get_timer_slot_delta(SLOT_PACMAN_MOVE) * TEXTURE_SCALE + i * TEXTURE_SCALE; break;
+                    case PACMAN_DIRECTION_MOVE_LEFT: pos_x = get_timer_slot_delta(SLOT_PACMAN_MOVE) * TEXTURE_SCALE + j * TEXTURE_SCALE; break;
+                    case PACMAN_DIRECTION_MOVE_DOWN: pos_y = fabs(get_timer_slot_delta(SLOT_PACMAN_MOVE)) * TEXTURE_SCALE + i * TEXTURE_SCALE; break;
+                    case PACMAN_DIRECTION_MOVE_RIGHT: pos_x = fabs(get_timer_slot_delta(SLOT_PACMAN_MOVE)) * TEXTURE_SCALE + j * TEXTURE_SCALE; break;
                     default: app_abort("draw_map()", "Unknown pacman direction")
                 }
                 DrawTexture(resources.textures[game.pacman.sprite_state], 

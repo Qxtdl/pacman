@@ -8,8 +8,8 @@
 
 #define TEXTURE_SCALE 30
 
-#define MAX_MAP_HEIGHT 40
-#define MAX_MAP_WIDTH 40
+#define MAX_MAP_HEIGHT 29
+#define MAX_MAP_WIDTH 29
 
 #define SCORE_GIVE_EAT_POINT 1
 #define SCORE_GIVE_EAT_GHOST 100
