@@ -33,7 +33,6 @@ enum tunnel_direction {
 };
 
 static void generate_tunnel(
-    char (*map)[MAX_MAP_HEIGHT][MAX_MAP_WIDTH],
     int tunnel_y,
     int tunnel_x,
     int tunnel_length,
@@ -43,22 +42,18 @@ static void generate_tunnel(
     for (int i = 0; i < tunnel_length; i++) {
         switch (direction) {
             case TUNNEL_DIRECTION_UP:
-                (*map)[clamp(tunnel_y - i, 0, MAX_MAP_HEIGHT - 1)][clamp(tunnel_x, 0, MAX_MAP_WIDTH - 1)] = type; break;
+                game.map[clamp(tunnel_y - i, 0, MAX_MAP_HEIGHT - 1)][clamp(tunnel_x, 0, MAX_MAP_WIDTH - 1)] = type; break;
             case TUNNEL_DIRECTION_LEFT:
-                (*map)[clamp(tunnel_y, 0, MAX_MAP_HEIGHT - 1)][clamp(tunnel_x - i, 0, MAX_MAP_WIDTH - 1)] = type; break; 
+                game.map[clamp(tunnel_y, 0, MAX_MAP_HEIGHT - 1)][clamp(tunnel_x - i, 0, MAX_MAP_WIDTH - 1)] = type; break; 
             case TUNNEL_DIRECTION_DOWN:
-                (*map)[clamp(tunnel_y + i, 0, MAX_MAP_HEIGHT - 1)][clamp(tunnel_x, 0, MAX_MAP_WIDTH - 1)] = type; break;
+                game.map[clamp(tunnel_y + i, 0, MAX_MAP_HEIGHT - 1)][clamp(tunnel_x, 0, MAX_MAP_WIDTH - 1)] = type; break;
             case TUNNEL_DIRECTION_RIGHT:
-                (*map)[clamp(tunnel_y, 0, MAX_MAP_HEIGHT - 1)][clamp(tunnel_x + i, 0, MAX_MAP_WIDTH - 1)] = type; break;
+                game.map[clamp(tunnel_y, 0, MAX_MAP_HEIGHT - 1)][clamp(tunnel_x + i, 0, MAX_MAP_WIDTH - 1)] = type; break;
         }
     }
 }
 
 void generate_maze(
-    char (*map)[MAX_MAP_HEIGHT][MAX_MAP_WIDTH],
-    int *map_height,
-    int *map_width,
-    int *game_max_points
 ) {
 /*
     step 1
@@ -73,26 +68,35 @@ void generate_maze(
 */
 
     // step 1
-    *map_height = random_int(MAX_MAP_HEIGHT/4, MAX_MAP_HEIGHT);
-    *map_width = random_int(MAX_MAP_WIDTH/4, MAX_MAP_WIDTH);
-    memset(map, CELL_WALL, sizeof(*map));
+    game.map_height = random_int(MAX_MAP_HEIGHT/4, MAX_MAP_HEIGHT);
+    game.map_width = random_int(MAX_MAP_WIDTH/4, MAX_MAP_WIDTH);
+    memset(game.map, CELL_WALL, sizeof(game.map));
 
     for (int i = 0; i < 100; i++)
         generate_tunnel(
-            map,
-            random_int(0, *map_height),
-            random_int(0, *map_height),
-            random_int(0, *map_width),
+            random_int(0, game.map_height),
+            random_int(0, game.map_height),
+            random_int(0, game.map_width),
             random_int(0, 3), 
-            random_int(0, 1) ? CELL_POINT : CELL_BACKGROUND);
+            random_int(0, 1) ? CELL_POINT : CELL_BACKGROUND
+        );
 
     int ghosts_amount = 0;
-    for (int i = 0; i < *map_height; i++)
-        for (int j = 0; i < *map_height && ghosts_amount < 6; i++)
+    for (int i = 0; i < game.map_height; i++)
+        for (int j = 0; j < game.map_width && ghosts_amount++ < 6; j++)
             if (game.map[i][j] == CELL_BACKGROUND) game.map[i][j] = CELL_GHOST_SPAWNER;
+    
+    int power_pellet_amount = 0;
+    for (int i = 0; i < game.map_height; i++)
+        for (int j = 0; j < game.map_width && power_pellet_amount++ < random_int(10, 30); j++)
+            if (game.map[i][j] == CELL_POINT) {
+                game.map[i][j] = CELL_POWER_PELLET;
+                i++;
+            }
+
 
     // step 2
     // for (int i = 0; i < random_int(3, 10000); i++) {
-    //     generate_tunnel(map, random_int(0, *map_height), random_int(0, *map_width), random_int(0, 5), TUNNEL_DIRECTION_LEFT);
+    //     generate_tunnel(map, random_int(0, game.map_height), random_int(0, game.map_width), random_int(0, 5), TUNNEL_DIRECTION_LEFT);
     // }
 }   
