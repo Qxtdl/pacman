@@ -37,6 +37,7 @@ void load_assets(void) {
 
     // ghost
     load_texture("assets/textures/ghosts/ghost.png", TEXTURE_SCALE, TEXTURE_SCALE);
+    load_texture("assets/textures/ghosts/ghostdead.png", TEXTURE_SCALE, TEXTURE_SCALE);
 
     // error
     load_texture("assets/textures/error.png", TEXTURE_SCALE, TEXTURE_SCALE);

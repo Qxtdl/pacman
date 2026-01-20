@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -g -Wall -Wextra -Werror -lraylib -fsanitize=address \
-	-Wno-error=unused-variable -Wno-error=unused-parameter -Wno-error=parentheses
+	-Wno-error=unused-variable -Wno-error=unused-parameter -Wno-error=parentheses -Wno-error=unused-function
 
 BUILD = build
 OUTPUT = $(BUILD)/pacman

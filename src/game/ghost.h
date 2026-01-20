@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 
+#include "entity.h"
 #include "../asset_index.h"
 
 enum state {
@@ -23,6 +24,8 @@ typedef struct {
     enum state state, old_state;
     int state_vector[STATE_AMOUNT][2];
     bool reached_vector;
+
+    enum direction direction;
 
     bool is_eaten;
 } ghost_t;

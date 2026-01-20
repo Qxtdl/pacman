@@ -5,6 +5,7 @@
 #include "../util.h"
 #include "../game.h"
 #include "../timer.h"
+#include "entity.h"
 #include "maphelp.h"
 #include "../assets.h"
 
@@ -19,7 +20,7 @@ void ghosts_setup(void) {
     for (int i = 0; i < game.map_height; i++)
         for (int j = 0; j < game.map_width; j++)
             if (game.map[i][j] == CELL_GHOST_SPAWNER)
-                add_ghost((ghost_t){TEXTURE_GHOST, i, j, i, j, STATE_CHASE, STATE_CHASE, {{0}}, true, false});
+                add_ghost((ghost_t){TEXTURE_GHOST, i, j, i, j, STATE_CHASE, STATE_CHASE, {{0}}, true, DIRECTION_NULL, false});
 }
 
 void reset_ghosts(void) {
@@ -54,15 +55,22 @@ static void ghost_moveto_target(ghost_t *ghost) {
     int pos_y_diff = lookup_ghost_target(ghost, ghost->state, 0) - ghost->pos_y,
         pos_x_diff = lookup_ghost_target(ghost, ghost->state, 1) - ghost->pos_x;
 
-    if (pos_x_diff > 0 && (!is_wall_or_ghost(ghost->pos_y, ghost->pos_x + 1) || ghost->is_eaten))
+    if (pos_x_diff > 0 && (!is_wall_or_ghost(ghost->pos_y, ghost->pos_x + 1) || ghost->is_eaten)) {
         ghost->pos_x++;
-    else if (pos_x_diff < 0 && (!is_wall_or_ghost(ghost->pos_y, ghost->pos_x -1) || ghost->is_eaten))
+        ghost->direction = DIRECTION_RIGHT;
+    }
+    else if (pos_x_diff < 0 && (!is_wall_or_ghost(ghost->pos_y, ghost->pos_x -1) || ghost->is_eaten)) {
         ghost->pos_x--;
-    else if (pos_y_diff > 0 && (!is_wall_or_ghost(ghost->pos_y + 1, ghost->pos_x) || ghost->is_eaten))
+        ghost->direction = DIRECTION_LEFT;
+    }
+    else if (pos_y_diff > 0 && (!is_wall_or_ghost(ghost->pos_y + 1, ghost->pos_x) || ghost->is_eaten)) {
         ghost->pos_y++;
-    else if (pos_y_diff < 0 && (!is_wall_or_ghost(ghost->pos_y  -  1, ghost->pos_x) || ghost->is_eaten))
+        ghost->direction = DIRECTION_DOWN;
+    }
+    else if (pos_y_diff < 0 && (!is_wall_or_ghost(ghost->pos_y  -  1, ghost->pos_x) || ghost->is_eaten)) {
         ghost->pos_y--;
-    else {
+        ghost->direction = DIRECTION_UP;
+    } else {
         if (!ghost->is_eaten && ghost->state != STATE_SCATTER)
             ghost_set_state(ghost, STATE_SCATTER);
         else if (ghost->state == STATE_SCATTER)
@@ -73,11 +81,14 @@ static void ghost_moveto_target(ghost_t *ghost) {
         ghost->reached_vector = true;
         if (ghost->state != STATE_EATEN)
             ghost_set_state(ghost, ghost->old_state);
-        else if (!game.pacman.power_mode && ghost->is_eaten) {
-            ghost->is_eaten = false;
-            ghost->old_state = STATE_CHASE; // now it's in state chase and if it cant find it's way it dies
-            ghost_set_state(ghost, STATE_CHASE);
-        }
+        // // TODO why is code below placed here
+        // else if (!game.pacman.power_mode && ghost->is_eaten) {
+        //     // ghost->is_eaten = false;
+        //     // ghost->sprite_state = TEXTURE_GHOST;
+            
+        //     // ghost->old_state = STATE_CHASE; // now it's in state chase and if it cant find it's way it dies
+        //     // ghost_set_state(ghost, STATE_CHASE);
+        // }
     }
 }
 
@@ -105,19 +116,29 @@ void ghost_tick(void) {
                     ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state, random_int(0, game.map_height - 1), random_int(0, game.map_width - 1));
                 break;
             case STATE_SCATTER: ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state, random_int(0, game.map_height - 1), random_int(0, game.map_width - 1)); break;
-            case STATE_EATEN: ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state, game.ghosts[i].spawn_pos_y, game.ghosts[i].spawn_pos_x); break;
-            default: app_abort("ghost_tick()", "Unknown ghost state") break;
+            case STATE_EATEN: {
+                if (!game.pacman.power_mode && game.ghosts[i].is_eaten) {
+                    game.ghosts[i].is_eaten = false;
+                    game.ghosts[i].sprite_state = TEXTURE_GHOST;
+            
+                    game.ghosts[i].old_state = STATE_CHASE; // now it's in state chase and if it cant find it's way it dies
+                    ghost_set_state(&game.ghosts[i], STATE_CHASE);
+                    break;
+                }
+                ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state, game.ghosts[i].spawn_pos_y, game.ghosts[i].spawn_pos_x); break;
+            }
+            default: break;
         }
     }
 
     if (timer_triggered(SLOT_GHOST_MOVE, game.pacman.power_mode ? SLOT_GHOST_MOVE_VALUE_FRIGHTENED : SLOT_GHOST_MOVE_VALUE))
         for (int i = 0; i < game.ghosts_amount; i++)
-            ghost_moveto_target(&game.ghosts[i]);
-
+        ghost_moveto_target(&game.ghosts[i]);
     if (game.pacman.power_mode)
     for (int i = 0; i < game.ghosts_amount; i++)
         if (game.ghosts[i].pos_y == game.pacman.pos_y && game.ghosts[i].pos_x == game.pacman.pos_x && !game.ghosts[i].is_eaten) {
             game.ghosts[i].is_eaten = true;
+            game.ghosts[i].sprite_state = TEXTURE_DEAD_GHOST;
             ghost_set_state(&game.ghosts[i], STATE_EATEN);
             game.round_score += SCORE_GIVE_EAT_GHOST;
             PlaySound(resources.sounds[SOUND_PACMAN_EATGHOST]);
