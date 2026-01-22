@@ -66,16 +66,14 @@ void pacman_tick(void) {
     }
     if (game.map[pacman.pos_y][pacman.pos_x] == CELL_POWER_PELLET) {
         game.map[pacman.pos_y][pacman.pos_x] = CELL_BACKGROUND;
+        pacman.power_mode = true;
 
-        // FOR NOW this code stays here since 
         for (int i = 0; i < ghosts_amount; i++)
-            if (!pacman.power_mode && !ghosts[i].is_eaten) ghost_set_state(&ghosts[i], STATE_FRIGHTENED);
+            if (!ghosts[i].is_eaten) ghost_set_state(&ghosts[i], STATE_FRIGHTENED);
 
         set_timer_slot(SLOT_PACMAN_POWER_DURATION, GetTime());
         PlaySound(resources.sounds[SOUND_PACMAN_EATFRUIT]);
         PlaySound(resources.sounds[SOUND_PACMAN_EXTRAPAC]);
-
-        pacman.power_mode = true;
     }
 
     for (int i = 0; !pacman.power_mode && i < ghosts_amount; i++)
