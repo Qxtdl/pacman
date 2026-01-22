@@ -33,8 +33,6 @@ extern struct session {
 
 extern struct game {
     struct pacman pacman;
-    ghost_t *ghosts;
-    int ghosts_amount;
 
     int map_height, map_width;
     char map[MAX_MAP_HEIGHT][MAX_MAP_WIDTH];

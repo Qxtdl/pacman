@@ -3,7 +3,7 @@
 #include "entity.h"
 #include "../asset_index.h"
 
-struct pacman {
+extern struct pacman {
     texture_index_t sprite_state;
 
     int pos_x, pos_y;
@@ -12,6 +12,6 @@ struct pacman {
     int points;
 
     bool power_mode;
-};
+} pacman;
 
 void pacman_tick(void);

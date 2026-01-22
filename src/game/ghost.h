@@ -30,6 +30,9 @@ typedef struct {
     bool is_eaten;
 } ghost_t;
 
+extern ghost_t *ghosts;
+extern int ghosts_amount;
+
 void ghosts_setup(void);
 void reset_ghosts(void);
 void ghost_set_state(ghost_t *ghost, enum state state);

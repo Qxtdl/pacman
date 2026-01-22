@@ -9,11 +9,14 @@
 #include "maphelp.h"
 #include "../assets.h"
 
+ghost_t *ghosts;
+int ghosts_amount;
+
 static void add_ghost(ghost_t ghost) {
-    game.ghosts = srealloc(game.ghosts, ++game.ghosts_amount * sizeof(ghost_t));
-    game.ghosts[game.ghosts_amount - 1] = ghost;
-    game.ghosts[game.ghosts_amount - 1].spawn_pos_y = ghost.pos_y;
-    game.ghosts[game.ghosts_amount - 1].spawn_pos_x = ghost.pos_x;
+    ghosts = srealloc(ghosts, ++ghosts_amount * sizeof(ghost_t));
+    ghosts[ghosts_amount - 1] = ghost;
+    ghosts[ghosts_amount - 1].spawn_pos_y = ghost.pos_y;
+    ghosts[ghosts_amount - 1].spawn_pos_x = ghost.pos_x;
 }
 
 void ghosts_setup(void) {
@@ -24,9 +27,9 @@ void ghosts_setup(void) {
 }
 
 void reset_ghosts(void) {
-    free(game.ghosts);
-    game.ghosts = NULL;
-    game.ghosts_amount = 0;
+    free(ghosts);
+    ghosts = NULL;
+    ghosts_amount = 0;
 }
 
 void ghost_set_state(ghost_t *ghost, enum state state) {
@@ -82,65 +85,66 @@ static void ghost_moveto_target(ghost_t *ghost) {
         if (ghost->state != STATE_EATEN)
             ghost_set_state(ghost, ghost->old_state);
         // // TODO why is code below placed here
-        // else if (!game.pacman.power_mode && ghost->is_eaten) {
-        //     // ghost->is_eaten = false;
-        //     // ghost->sprite_state = TEXTURE_GHOST;
+        // else if (!pacman.power_mode && ghost->is_eaten) {
+        //     ghost->is_eaten = false;
+        //     ghost->sprite_state = TEXTURE_GHOST;
             
-        //     // ghost->old_state = STATE_CHASE; // now it's in state chase and if it cant find it's way it dies
-        //     // ghost_set_state(ghost, STATE_CHASE);
+        //     ghost->old_state = STATE_CHASE; // now it's in state chase and if it cant find it's way it dies
+        //     ghost_set_state(ghost, STATE_CHASE);
         // }
     }
 }
 
 void ghost_tick(void) {
-    for (int i = 0; i < game.ghosts_amount; i++) {
-        switch (game.ghosts[i].state) {
+    for (int i = 0; i < ghosts_amount; i++) {
+        switch (ghosts[i].state) {
             case STATE_NULL: break;
             case STATE_CHASE: {
-                if (game.map[game.pacman.pos_y][game.pacman.pos_x] == CELL_X_TUNNEL)
-                    ghost_set_target(&game.ghosts[i], game.ghosts[i].state,game.pacman.pos_y, game.pacman.pos_x);
+                if (game.map[pacman.pos_y][pacman.pos_x] == CELL_X_TUNNEL)
+                    ghost_set_target(&ghosts[i], ghosts[i].state,pacman.pos_y, pacman.pos_x);
                 else 
-                    ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state,game.pacman.pos_y, game.pacman.pos_x);
+                    ghost_set_target_now(&ghosts[i], ghosts[i].state,pacman.pos_y, pacman.pos_x);
             }
             break;
             case STATE_FRIGHTENED:
-                if (game.pacman.pos_y == game.ghosts[i].pos_y && game.pacman.pos_x == game.ghosts[i].pos_x + 1)
-                    ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state, game.ghosts[i].pos_y, game.ghosts[i].pos_x - 1);
-                else if (game.pacman.pos_y == game.ghosts[i].pos_y && game.pacman.pos_x == game.ghosts[i].pos_x - 1)
-                    ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state, game.ghosts[i].pos_y, game.ghosts[i].pos_x + 1);
-                else if (game.pacman.pos_y == game.ghosts[i].pos_y + 1 && game.pacman.pos_x == game.ghosts[i].pos_x)
-                    ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state, game.ghosts[i].pos_y - 1, game.ghosts[i].pos_x);
-                else if (game.pacman.pos_y == game.ghosts[i].pos_y - 1 && game.pacman.pos_x == game.ghosts[i].pos_x)
-                    ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state, game.ghosts[i].pos_y + 1, game.ghosts[i].pos_x);
+                if (pacman.pos_y == ghosts[i].pos_y && pacman.pos_x == ghosts[i].pos_x + 1)
+                    ghost_set_target_now(&ghosts[i], ghosts[i].state, ghosts[i].pos_y, ghosts[i].pos_x - 1);
+                else if (pacman.pos_y == ghosts[i].pos_y && pacman.pos_x == ghosts[i].pos_x - 1)
+                    ghost_set_target_now(&ghosts[i], ghosts[i].state, ghosts[i].pos_y, ghosts[i].pos_x + 1);
+                else if (pacman.pos_y == ghosts[i].pos_y + 1 && pacman.pos_x == ghosts[i].pos_x)
+                    ghost_set_target_now(&ghosts[i], ghosts[i].state, ghosts[i].pos_y - 1, ghosts[i].pos_x);
+                else if (pacman.pos_y == ghosts[i].pos_y - 1 && pacman.pos_x == ghosts[i].pos_x)
+                    ghost_set_target_now(&ghosts[i], ghosts[i].state, ghosts[i].pos_y + 1, ghosts[i].pos_x);
                 else 
-                    ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state, random_int(0, game.map_height - 1), random_int(0, game.map_width - 1));
+                    ghost_set_target_now(&ghosts[i], ghosts[i].state, random_int(0, game.map_height - 1), random_int(0, game.map_width - 1));
                 break;
-            case STATE_SCATTER: ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state, random_int(0, game.map_height - 1), random_int(0, game.map_width - 1)); break;
+            case STATE_SCATTER: ghost_set_target_now(&ghosts[i], ghosts[i].state, random_int(0, game.map_height - 1), random_int(0, game.map_width - 1)); break;
             case STATE_EATEN: {
-                if (!game.pacman.power_mode && game.ghosts[i].is_eaten) {
-                    game.ghosts[i].is_eaten = false;
-                    game.ghosts[i].sprite_state = TEXTURE_GHOST;
+                if (!pacman.power_mode && ghosts[i].is_eaten) {
+                    ghosts[i].is_eaten = false;
+                    ghosts[i].sprite_state = TEXTURE_GHOST;
             
-                    game.ghosts[i].old_state = STATE_CHASE; // now it's in state chase and if it cant find it's way it dies
-                    ghost_set_state(&game.ghosts[i], STATE_CHASE);
+                    ghosts[i].old_state = STATE_CHASE; // now it's in state chase and if it cant find it's way it dies
+                    ghost_set_state(&ghosts[i], STATE_CHASE);
                     break;
                 }
-                ghost_set_target_now(&game.ghosts[i], game.ghosts[i].state, game.ghosts[i].spawn_pos_y, game.ghosts[i].spawn_pos_x); break;
+                ghost_set_target_now(&ghosts[i], ghosts[i].state, ghosts[i].spawn_pos_y, ghosts[i].spawn_pos_x); break;
             }
             default: break;
         }
     }
 
-    if (timer_triggered(SLOT_GHOST_MOVE, game.pacman.power_mode ? SLOT_GHOST_MOVE_VALUE_FRIGHTENED : SLOT_GHOST_MOVE_VALUE))
-        for (int i = 0; i < game.ghosts_amount; i++)
-        ghost_moveto_target(&game.ghosts[i]);
-    if (game.pacman.power_mode)
-    for (int i = 0; i < game.ghosts_amount; i++)
-        if (game.ghosts[i].pos_y == game.pacman.pos_y && game.ghosts[i].pos_x == game.pacman.pos_x && !game.ghosts[i].is_eaten) {
-            game.ghosts[i].is_eaten = true;
-            game.ghosts[i].sprite_state = TEXTURE_DEAD_GHOST;
-            ghost_set_state(&game.ghosts[i], STATE_EATEN);
+    if (timer_triggered(SLOT_GHOST_MOVE, pacman.power_mode ? SLOT_GHOST_MOVE_VALUE_FRIGHTENED : SLOT_GHOST_MOVE_VALUE))
+        for (int i = 0; i < ghosts_amount; i++)
+        ghost_moveto_target(&ghosts[i]);
+    if (pacman.power_mode)
+    for (int i = 0; i < ghosts_amount; i++) {
+        if (ghosts[i].pos_y == pacman.pos_y && ghosts[i].pos_x == pacman.pos_x && !ghosts[i].is_eaten) {
+            ghosts[i].is_eaten = true;
+            ghosts[i].sprite_state = TEXTURE_DEAD_GHOST;
+            ghost_set_state(&ghosts[i], STATE_EATEN);
             game.round_score += SCORE_GIVE_EAT_GHOST;
             PlaySound(resources.sounds[SOUND_PACMAN_EATGHOST]);
         }
+    }
 }

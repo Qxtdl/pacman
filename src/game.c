@@ -27,8 +27,8 @@ void game_setup(void) {
     strcat(buf, ".txt");
 
     init_timer_slot(TIMER_SLOT_AMOUNT);
-    if (!load_map(buf, &game.map, &game.map_height, &game.map_width, &game.pacman.pos_y, &game.pacman.pos_x))
-        generate_map(&game.map, &game.map_height, &game.map_width, &game.pacman.pos_y, &game.pacman.pos_x);
+    if (!load_map(buf, &game.map, &game.map_height, &game.map_width, &pacman.pos_y, &pacman.pos_x))
+        generate_map(&game.map, &game.map_height, &game.map_width, &pacman.pos_y, &pacman.pos_x);
     map_count_max_points();
     ghosts_setup();
 }
@@ -63,7 +63,7 @@ void game_tick(void) {
         }
         return;    
     }
-    if (game.pacman.points == game.max_points || IS_DEBUGGING(next_level)) {
+    if (pacman.points == game.max_points || IS_DEBUGGING(next_level)) {
         set_timer_slot(SLOT_ROUND_END_DURATION, GetTime());
         game.level_won = true;
     }
@@ -71,9 +71,9 @@ void game_tick(void) {
     pacman_tick();
     if (!IS_DEBUGGING(ghost_tick)) ghost_tick();
 
-    tunnel_entity(&game.pacman.pos_y, &game.pacman.pos_x);
-    for (int i = 0; i < game.ghosts_amount; i++)
-        tunnel_entity(&game.ghosts[i].pos_y, &game.ghosts[i].pos_x);
+    tunnel_entity(&pacman.pos_y, &pacman.pos_x);
+    for (int i = 0; i < ghosts_amount; i++)
+        tunnel_entity(&ghosts[i].pos_y, &ghosts[i].pos_x);
 }
 
 static void draw_entity(int pos_y, int pos_x, enum direction direction, double delta, texture_index_t sprite) {
@@ -105,27 +105,27 @@ static void draw_map(void) {
                 case CELL_POWER_PELLET: DrawCircle(j * TEXTURE_SCALE + 15, i * TEXTURE_SCALE + 15, TEXTURE_SCALE/3.0f, WHITE); break; // todo: make it change size
                 default: DrawTexture(resources.textures[TEXTURE_ERROR], j * TEXTURE_SCALE, i * TEXTURE_SCALE, WHITE); break;
             }
-            if (i == game.pacman.pos_y && j == game.pacman.pos_x)
-                draw_entity(game.pacman.pos_y, game.pacman.pos_x, game.pacman.real_direction, get_timer_slot_delta(SLOT_PACMAN_MOVE), game.pacman.sprite_state);
+            if (i == pacman.pos_y && j == pacman.pos_x)
+                draw_entity(pacman.pos_y, pacman.pos_x, pacman.real_direction, get_timer_slot_delta(SLOT_PACMAN_MOVE), pacman.sprite_state);
             
-            for (int k = 0; k < game.ghosts_amount; k++)
-                if (game.ghosts[k].pos_y == i && game.ghosts[k].pos_x == j) {
+            for (int k = 0; k < ghosts_amount; k++)
+                if (ghosts[k].pos_y == i && ghosts[k].pos_x == j) {
                     #ifdef SMOOTH_GHOST_MOVEMENT
-                    draw_entity(game.ghosts[k].pos_y, game.ghosts[k].pos_x, game.ghosts[k].direction, get_timer_slot_delta(SLOT_GHOST_MOVE), game.ghosts[k].sprite_state);
+                    draw_entity(ghosts[k].pos_y, ghosts[k].pos_x, ghosts[k].direction, get_timer_slot_delta(SLOT_GHOST_MOVE), ghosts[k].sprite_state);
                     #else
-                    draw_entity(game.ghosts[k].pos_y, game.ghosts[k].pos_x, game.ghosts[k].direction, 0, game.ghosts[k].sprite_state);
+                    draw_entity(ghosts[k].pos_y, ghosts[k].pos_x, ghosts[k].direction, 0, ghosts[k].sprite_state);
                     #endif
                     // Color tint = WHITE;
 
-                    // if (game.pacman.power_mode) tint = DARKGRAY;
-                    // if (game.ghosts[k].is_eaten) tint = GREEN;
+                    // if (pacman.power_mode) tint = DARKGRAY;
+                    // if (ghosts[k].is_eaten) tint = GREEN;
                     // DrawTexture(
-                    //     resources.textures[game.ghosts[k].sprite_state], 
+                    //     resources.textures[ghosts[k].sprite_state], 
                     //     j * TEXTURE_SCALE, 
                     //     i * TEXTURE_SCALE, 
                     //     tint
                     // );
-                    if (session.is_debugging) DrawText(TextFormat("%d", game.ghosts[k].state), game.ghosts[k].pos_x * TEXTURE_SCALE, game.ghosts[k].pos_y * TEXTURE_SCALE, TEXTURE_SCALE/2, WHITE);
+                    if (session.is_debugging) DrawText(TextFormat("%d", ghosts[k].state), ghosts[k].pos_x * TEXTURE_SCALE, ghosts[k].pos_y * TEXTURE_SCALE, TEXTURE_SCALE/2, WHITE);
                 }
         }
     }
@@ -137,9 +137,9 @@ void game_draw(void) {
 
     draw_map();
 
-    DrawText(TextFormat("Points: %d\nMax Points: %d", game.pacman.points, game.max_points), 0, game.map_height * TEXTURE_SCALE, TEXTURE_SCALE, WHITE);
+    DrawText(TextFormat("Points: %d\nMax Points: %d", pacman.points, game.max_points), 0, game.map_height * TEXTURE_SCALE, TEXTURE_SCALE, WHITE);
     DrawText(TextFormat("Score: %d Lvl Score: %d", session.score, game.round_score), 8 * TEXTURE_SCALE, game.map_height * TEXTURE_SCALE, TEXTURE_SCALE, WHITE);
-    if (game.pacman.power_mode) DrawText(TextFormat("ATE A POWER PELLET\nTIME REMAINING: %f\n", get_delta_time(SLOT_PACMAN_POWER_DURATION)), (game.pacman.pos_x - 2) * TEXTURE_SCALE, (game.pacman.pos_y - 1) * TEXTURE_SCALE, TEXTURE_SCALE/1.5, RED);
+    if (pacman.power_mode) DrawText(TextFormat("ATE A POWER PELLET\nTIME REMAINING: %f\n", get_delta_time(SLOT_PACMAN_POWER_DURATION)), (pacman.pos_x - 2) * TEXTURE_SCALE, (pacman.pos_y - 1) * TEXTURE_SCALE, TEXTURE_SCALE/1.5, RED);
     if (game.game_over) DrawText("GAME OVER\nPress space", 0, (game.map_height + 2) * TEXTURE_SCALE, TEXTURE_SCALE, RED);
     if (game.level_won) DrawText("GAME WON!\nPress space -> next level", 0, (game.map_height + 2) * TEXTURE_SCALE, TEXTURE_SCALE, GREEN);
     if (game.won) DrawText(TextFormat("YOU\nWON\n%d POINTS", session.score), GetScreenWidth()/2, GetScreenHeight()/2, TEXTURE_SCALE, GREEN);
